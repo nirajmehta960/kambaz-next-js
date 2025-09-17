@@ -23,11 +23,11 @@ export default function CourseNavigation() {
         Zoom
       </Link>
       <br />
-      <Link href={`/Courses/${cid}/Assignments`} id="wd-course-quizzes-link">
+      <Link href={`/Courses/${cid}/Assignments`} id="wd-course-assignments-link">
         Assignments
       </Link>
       <br />
-      <Link href={`/Courses/${cid}/Quizzes`} id="wd-course-assignments-link">
+      <Link href={`/Courses/${cid}/Quizzes`} id="wd-course-quizzes-link">
         Quizzes
       </Link>
       <br />
