@@ -1,6 +1,10 @@
+"use client";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function Assignments() {
+  const params = useParams();
+  const cid = params.cid;
   return (
     <div id="wd-assignments">
       <input placeholder="Search for Assignments" id="wd-search-assignment" />
@@ -12,7 +16,7 @@ export default function Assignments() {
       <ul id="wd-assignment-list">
         <li className="wd-assignment-list-item">
           <Link
-            href="/Courses/1234/Assignments/123"
+            href={`/Courses/${cid}/Assignments/123`}
             className="wd-assignment-link"
           >
             A1 - ENV + HTML
@@ -24,7 +28,7 @@ export default function Assignments() {
         </li>
         <li className="wd-assignment-list-item">
           <Link
-            href="/Courses/1234/Assignments/124"
+            href={`/Courses/${cid}/Assignments/124`}
             className="wd-assignment-link"
           >
             A2 - CSS + BOOTSTRAP
@@ -36,7 +40,7 @@ export default function Assignments() {
         </li>
         <li className="wd-assignment-list-item">
           <Link
-            href="/Courses/1234/Assignments/125"
+            href={`/Courses/${cid}/Assignments/125`}
             className="wd-assignment-link"
           >
             A3 - JAVASCRIPT + REACT
