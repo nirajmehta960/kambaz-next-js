@@ -4,7 +4,7 @@ export default function Dashboard() {
   return (
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1> <hr />
-      <h2 id="wd-dashboard-published">Published Courses (3)</h2> <hr />
+      <h2 id="wd-dashboard-published">Published Courses (3+)</h2> <hr />
       <div id="wd-dashboard-courses">
         <div className="wd-dashboard-course">
           <Link href="/Courses/1234" className="wd-dashboard-course-link">
@@ -23,8 +23,27 @@ export default function Dashboard() {
             </div>
           </Link>
         </div>
+        <br />
         <div className="wd-dashboard-course">
           <Link href="/Courses/1235" className="wd-dashboard-course-link">
+            <Image
+              src="/images/nodejs.jpg"
+              width={200}
+              height={150}
+              alt="Node.js Fundamentals course"
+            />
+            <div>
+              <h5> CS1235 Node.js Fundamentals </h5>
+              <p className="wd-dashboard-course-title">
+                Learn backend development with Node.js
+              </p>
+              <button> Go </button>
+            </div>
+          </Link>
+        </div>
+        <br />
+        <div className="wd-dashboard-course">
+          <Link href="/Courses/1236" className="wd-dashboard-course-link">
             <Image
               src="/images/nextjs.jpg"
               width={200}
@@ -32,7 +51,7 @@ export default function Dashboard() {
               alt="Next.js Essentials course"
             />
             <div>
-              <h5> CS1235 Next.js Essentials </h5>
+              <h5> CS1236 Next.js Essentials </h5>
               <p className="wd-dashboard-course-title">
                 Learn the fundamentals of Next.js
               </p>
@@ -40,8 +59,9 @@ export default function Dashboard() {
             </div>
           </Link>
         </div>
+        <br />
         <div className="wd-dashboard-course">
-          <Link href="/Courses/1236" className="wd-dashboard-course-link">
+          <Link href="/Courses/1237" className="wd-dashboard-course-link">
             <Image
               src="/images/advwebdev.jpg"
               width={200}
@@ -49,7 +69,7 @@ export default function Dashboard() {
               alt="Advanced Web Dev course"
             />
             <div>
-              <h5> CS1236 Advanced Web Dev </h5>
+              <h5> CS1237 Advanced Web Dev </h5>
               <p className="wd-dashboard-course-title">
                 Deep dive into modern web development
               </p>

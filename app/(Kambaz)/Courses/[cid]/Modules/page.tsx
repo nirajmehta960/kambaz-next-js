@@ -81,6 +81,30 @@ export default function Modules() {
             </li>
           </ul>
         </li>
+          <li className="wd-module">
+            <div className="wd-title">
+              Week 1, Lecture 3 - Introduction to CSS
+            </div>
+            <ul className="wd-lessons">
+              <li className="wd-lesson">
+                <span className="wd-title">LEARNING OBJECTIVES</span>
+                <ul className="wd-content">
+                  <li className="wd-content-item">Understand the basics of CSS</li>
+                  <li className="wd-content-item">Learn how to style HTML elements</li>
+                  <li className="wd-content-item">Explore selectors, properties, and values</li>
+                </ul>
+              </li>
+              <li className="wd-lesson">
+                <span className="wd-title">SLIDES</span>
+                <ul className="wd-content">
+                  <li className="wd-content-item">Introduction to CSS</li>
+                  <li className="wd-content-item">Styling text and backgrounds</li>
+                  <li className="wd-content-item">Using classes and IDs</li>
+                  <li className="wd-content-item">CSS Box Model</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
       </ul>
     </div>
   );
