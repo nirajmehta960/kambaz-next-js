@@ -9,7 +9,7 @@ body * {
 
 @media (min-width: 768px) {
   #wd-kambaz .wd-main-content-offset {
-    padding-left: 140px !important;
+    padding-left: 130px !important;
   }
 }
 
@@ -17,4 +17,30 @@ body * {
   color: black;
   background-color: white;
   border-left: 3px solid black !important;
+}
+
+.btn-secondary {
+  --bs-btn-color: #000 !important;
+  --bs-btn-bg: #c7cdd1 !important;
+  --bs-btn-border-color: #c7cdd1 !important;
+  --bs-btn-hover-color: #fff !important;
+}
+
+.bg-secondary {
+  --bs-secondary-rgb: 199, 205, 209;
+}
+
+.list-group-item {
+  --bs-list-group-border-color: gray;
+}
+
+.wd-lesson {
+  border-left: 3px solid green !important;
+}
+
+.wd-assignment-list-item {
+  border-left: 3px solid green !important;
+}
+.wd-assignment-link {
+  color: #000 !important;
 }

@@ -18,7 +18,12 @@ export default function Dashboard() {
       <h2 id="wd-dashboard-published">Published Courses (8)</h2>
       <hr />
       <div id="wd-dashboard-courses">
-        <Row xs={1} md={5} className="g-4">
+        <Row
+          xs={1}
+          md={4}
+          className="g-4"
+          style={{ rowGap: 32, columnGap: 32 }}
+        >
           <Col className="wd-dashboard-course" style={{ width: "300px" }}>
             <Card>
               <Link
