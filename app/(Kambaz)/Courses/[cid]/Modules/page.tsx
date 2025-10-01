@@ -26,18 +26,18 @@ export default function Modules() {
             </ListGroupItem>
             <ListGroupItem className="wd-lesson p-3 ps-1">
               <BsGripVertical className="me-2 fs-3" /> Introduction to the
-              course <LessonControlButtons />
+              Course <LessonControlButtons />
             </ListGroupItem>
             <ListGroupItem className="wd-lesson p-3 ps-1">
-              <BsGripVertical className="me-2 fs-3" /> Learn what is Web
+              <BsGripVertical className="me-2 fs-3" /> Introduction to Web
               Development <LessonControlButtons />
             </ListGroupItem>
             <ListGroupItem className="wd-lesson p-3 ps-1">
-              <BsGripVertical className="me-2 fs-3" /> LESSON 1{" "}
+              <BsGripVertical className="me-2 fs-3" /> LESSON 1 - HTML Basics
               <LessonControlButtons />
             </ListGroupItem>
             <ListGroupItem className="wd-lesson p-3 ps-1">
-              <BsGripVertical className="me-2 fs-3" /> LESSON 2{" "}
+              <BsGripVertical className="me-2 fs-3" /> LESSON 2 - CSS Basics
               <LessonControlButtons />
             </ListGroupItem>
           </ListGroup>
@@ -53,11 +53,12 @@ export default function Modules() {
               <LessonControlButtons />
             </ListGroupItem>
             <ListGroupItem className="wd-lesson p-3 ps-1">
-              <BsGripVertical className="me-2 fs-3" /> LESSON 1{" "}
+              <BsGripVertical className="me-2 fs-3" /> LESSON 3 - JavaScript
+              Fundamentals
               <LessonControlButtons />
             </ListGroupItem>
             <ListGroupItem className="wd-lesson p-3 ps-1">
-              <BsGripVertical className="me-2 fs-3" /> LESSON 2{" "}
+              <BsGripVertical className="me-2 fs-3" /> LESSON 4 - React Basics
               <LessonControlButtons />
             </ListGroupItem>
           </ListGroup>
