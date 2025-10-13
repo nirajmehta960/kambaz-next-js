@@ -1,10 +1,13 @@
 export default function SimpleArrays() {
-  let functionScoped = 2;
+  const functionScoped = 2;
   const blockScoped = 5;
   const constant1 = functionScoped - blockScoped;
   const numberArray1 = [1, 2, 3, 4, 5];
   const stringArray1 = ["string1", "string2"];
-  const htmlArray1 = [<li>Buy milk</li>, <li>Feed the pets</li>];
+  const htmlArray1 = [
+    <li key="milk">Buy milk</li>,
+    <li key="pets">Feed the pets</li>,
+  ];
   const variableArray1 = [
     functionScoped,
     blockScoped,
