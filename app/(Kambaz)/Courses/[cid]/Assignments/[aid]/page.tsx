@@ -1,8 +1,19 @@
 "use client";
 
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import * as db from "../../../../Database";
 
 export default function AssignmentEditor() {
+  const params = useParams();
+  const cid = params.cid;
+  const aid = params.aid;
+
+  // Find the assignment from the database
+  const assignment = db.assignments.find(
+    (assignment) => assignment._id === aid
+  );
   return (
     <Container fluid id="wd-assignments-editor" className="py-2">
       <Form>
@@ -10,7 +21,7 @@ export default function AssignmentEditor() {
           <Col sm={12} md={8} lg={6}>
             <Form.Group controlId="wd-name">
               <Form.Label className="fw-semibold">Assignment Name</Form.Label>
-              <Form.Control defaultValue="A1" />
+              <Form.Control defaultValue={assignment?.title || "Assignment"} />
             </Form.Group>
           </Col>
         </Row>
@@ -18,26 +29,9 @@ export default function AssignmentEditor() {
         <Row className="g-3 mb-4">
           <Col sm={12} md={8} lg={6}>
             <div className="border rounded p-3">
-              <p className="mb-2">
-                The assignment is{" "}
-                <span className="text-danger">available online</span>
-              </p>
-              <p className="mb-2">
-                Submit a link to the landing page of your Web application
-                running on Vercel.
-              </p>
-              <p className="mb-2">
-                The landing page should include the following:
-              </p>
-              <ul className="mb-2">
-                <li>Your full name and section</li>
-                <li>Links to each of the lab assignments</li>
-                <li>Link to the Kambaz application</li>
-                <li>Links to all relevant source code repositories</li>
-              </ul>
               <p className="mb-0">
-                The Kambaz application should include a link to navigate back to
-                the landing page.
+                {assignment?.description ||
+                  "Assignment description not available."}
               </p>
             </div>
           </Col>
@@ -48,7 +42,11 @@ export default function AssignmentEditor() {
             <Form.Label htmlFor="wd-points">Points</Form.Label>
           </Col>
           <Col sm={9} md={6} lg={4}>
-            <Form.Control id="wd-points" type="number" defaultValue={100} />
+            <Form.Control
+              id="wd-points"
+              type="number"
+              defaultValue={assignment?.points || 100}
+            />
           </Col>
         </Row>
 
@@ -137,7 +135,10 @@ export default function AssignmentEditor() {
                 <Col xs={12}>
                   <Form.Group controlId="wd-due-date">
                     <Form.Label className="fw-semibold">Due</Form.Label>
-                    <Form.Control type="date" defaultValue="2024-05-13" />
+                    <Form.Control
+                      type="date"
+                      defaultValue={assignment?.dueDate || "2024-05-13"}
+                    />
                   </Form.Group>
                 </Col>
                 <Col xs={6}>
@@ -145,7 +146,10 @@ export default function AssignmentEditor() {
                     <Form.Label className="fw-semibold">
                       Available from
                     </Form.Label>
-                    <Form.Control type="date" defaultValue="2024-05-06" />
+                    <Form.Control
+                      type="date"
+                      defaultValue={assignment?.availableFrom || "2024-05-06"}
+                    />
                   </Form.Group>
                 </Col>
                 <Col xs={6}>
@@ -173,8 +177,12 @@ export default function AssignmentEditor() {
             lg={4}
             className="d-flex justify-content-end gap-2"
           >
-            <Button variant="light">Cancel</Button>
-            <Button variant="danger">Save</Button>
+            <Link href={`/Courses/${cid}/Assignments`}>
+              <Button variant="light">Cancel</Button>
+            </Link>
+            <Link href={`/Courses/${cid}/Assignments`}>
+              <Button variant="danger">Save</Button>
+            </Link>
           </Col>
         </Row>
       </Form>
