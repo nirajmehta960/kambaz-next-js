@@ -12,7 +12,7 @@ export default function AssignmentEditor() {
 
   // Find the assignment from the database
   const assignment = db.assignments.find(
-    (assignment: any) => assignment._id === aid
+    (assignment) => assignment._id === aid
   );
   return (
     <Container fluid id="wd-assignments-editor" className="py-2">

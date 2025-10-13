@@ -40,8 +40,8 @@ export default function Assignments() {
             id="wd-assignment-list"
           >
             {assignments
-              .filter((assignment: any) => assignment.course === cid)
-              .map((assignment: any, index: number) => (
+              .filter((assignment) => assignment.course === cid)
+              .map((assignment, index: number) => (
                 <ListGroupItem
                   key={assignment._id}
                   className="wd-assignment-list-item list-group-item-action p-2 ps-1 d-flex justify-content-between align-items-center"
