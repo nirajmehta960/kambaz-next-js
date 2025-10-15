@@ -3,7 +3,7 @@
     "_id": "A101",
     "title": "Propulsion Assignment",
     "course": "RS101",
-    "description": "The assignment is available online. Submit a link to the landing page of your Web application running on Vercel. The landing page should include the following: Your full name and section, Links to each of the lab assignments, Link to the Kambaz application, Links to all relevant source code repositories. The Kambaz application should include a link to navigate back to the landing page.",
+    "description": "This assignment explores the fundamentals of rocket propulsion, focusing on the principles of thrust generation, specific impulse, and propulsion efficiency. Students will analyze different propulsion systems, perform performance calculations, and understand their applications in space missions.",
     "points": 100,
     "dueDate": "2024-05-13",
     "availableFrom": "2024-05-06"

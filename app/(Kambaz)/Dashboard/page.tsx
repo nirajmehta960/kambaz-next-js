@@ -13,6 +13,21 @@ import * as db from "../Database";
 
 export default function Dashboard() {
   const courses = db.courses;
+
+  // Map course IDs to specific images
+  const getCourseImage = (courseId: string) => {
+    const imageMap: { [key: string]: string } = {
+      RS101: "/images/advwebdev.jpg", // Rocket Propulsion
+      RS102: "/images/ai-ml.jpg", // Aerodynamics
+      RS103: "/images/cloudcomp.jpg", // Spacecraft Design
+      RS104: "/images/dbms.jpg", // Organic Chemistry
+      RS105: "/images/appdev.jpg", // Inorganic Chemistry
+      RS106: "/images/nextjs.jpg", // Physical Chemistry
+      RS107: "/images/reactjs.jpg", // Ancient Languages
+      RS108: "/images/nodejs.jpg", // Inter-species Diplomacy
+    };
+    return imageMap[courseId] || "/images/reactjs.jpg"; // Default image
+  };
   return (
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1> <hr />
@@ -34,7 +49,7 @@ export default function Dashboard() {
                   className="wd-dashboard-course-link text-decoration-none text-dark"
                 >
                   <CardImg
-                    src="/images/reactjs.jpg"
+                    src={getCourseImage(course._id)}
                     variant="top"
                     width="100%"
                     height={160}
