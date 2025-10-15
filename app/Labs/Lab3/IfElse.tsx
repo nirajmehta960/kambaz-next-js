@@ -1,5 +1,5 @@
 export default function IfElse() {
-  const true1 = true,
+  let true1 = true,
     false1 = false;
   return (
     <div id="wd-if-else">
