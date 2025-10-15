@@ -28,6 +28,9 @@ import Styles from "./Styles";
 import Add from "./Add";
 import Square from "./Square";
 import Highlight from "./Highlight";
+import TodoList from "./todos/TodoList";
+import TodoItem from "./todos/TodoItem";
+import PathParameters from "./PathParameters";
 
 export default function Lab3() {
   console.log("Hello World!");
@@ -72,6 +75,12 @@ export default function Lab3() {
         excepturi consectetur. Modi omnis minus sequi maiores, provident
         voluptates.
       </Highlight>
+      <hr />
+      <PathParameters />
+      <hr />
+      <TodoItem />
+      <hr />
+      <TodoList />
     </div>
   );
 }
