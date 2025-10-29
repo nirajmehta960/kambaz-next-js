@@ -1,19 +1,36 @@
 "use client";
 
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import * as db from "../../../../Database";
+import { useDispatch, useSelector } from "react-redux";
+import { addAssignment, updateAssignment } from "../reducer";
+import { useEffect, useState } from "react";
 
 export default function AssignmentEditor() {
-  const params = useParams();
-  const cid = params.cid;
-  const aid = params.aid;
+  const { cid, aid } = useParams();
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
 
-  // Find the assignment from the database
-  const assignment = db.assignments.find(
-    (assignment: any) => assignment._id === aid
+  const existing = assignments.find((a: any) => a._id === aid);
+  const isNew = aid === "new" || !existing;
+  const [form, setForm] = useState<any>(
+    existing || {
+      _id: undefined,
+      title: "New Assignment",
+      description: "",
+      points: 100,
+      dueDate: "",
+      availableFrom: "",
+      availableUntil: "",
+      course: cid,
+    }
   );
+
+  useEffect(() => {
+    if (existing) setForm(existing);
+  }, [existing]);
   return (
     <Container fluid id="wd-assignments-editor" className="py-2">
       <Form>
@@ -21,7 +38,10 @@ export default function AssignmentEditor() {
           <Col sm={12} md={8} lg={6}>
             <Form.Group controlId="wd-name">
               <Form.Label className="fw-semibold">Assignment Name</Form.Label>
-              <Form.Control defaultValue={assignment?.title || "Assignment"} />
+              <Form.Control
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -29,10 +49,15 @@ export default function AssignmentEditor() {
         <Row className="g-3 mb-4">
           <Col sm={12} md={8} lg={6}>
             <div className="border rounded p-3">
-              <p className="mb-0">
-                {assignment?.description ||
-                  "Assignment description not available."}
-              </p>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                value={form.description}
+                placeholder="New Assignment Description"
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
+              />
             </div>
           </Col>
         </Row>
@@ -45,7 +70,10 @@ export default function AssignmentEditor() {
             <Form.Control
               id="wd-points"
               type="number"
-              defaultValue={assignment?.points || 100}
+              value={form.points}
+              onChange={(e) =>
+                setForm({ ...form, points: parseInt(e.target.value || "0") })
+              }
             />
           </Col>
         </Row>
@@ -137,7 +165,10 @@ export default function AssignmentEditor() {
                     <Form.Label className="fw-semibold">Due</Form.Label>
                     <Form.Control
                       type="date"
-                      defaultValue={assignment?.dueDate || "2024-05-13"}
+                      value={form.dueDate}
+                      onChange={(e) =>
+                        setForm({ ...form, dueDate: e.target.value })
+                      }
                     />
                   </Form.Group>
                 </Col>
@@ -148,14 +179,23 @@ export default function AssignmentEditor() {
                     </Form.Label>
                     <Form.Control
                       type="date"
-                      defaultValue={assignment?.availableFrom || "2024-05-06"}
+                      value={form.availableFrom}
+                      onChange={(e) =>
+                        setForm({ ...form, availableFrom: e.target.value })
+                      }
                     />
                   </Form.Group>
                 </Col>
                 <Col xs={6}>
                   <Form.Group controlId="wd-available-until">
                     <Form.Label className="fw-semibold">Until</Form.Label>
-                    <Form.Control type="date" defaultValue="2024-05-27" />
+                    <Form.Control
+                      type="date"
+                      value={form.availableUntil || ""}
+                      onChange={(e) =>
+                        setForm({ ...form, availableUntil: e.target.value })
+                      }
+                    />
                   </Form.Group>
                 </Col>
               </Row>
@@ -180,9 +220,19 @@ export default function AssignmentEditor() {
             <Link href={`/Courses/${cid}/Assignments`}>
               <Button variant="light">Cancel</Button>
             </Link>
-            <Link href={`/Courses/${cid}/Assignments`}>
-              <Button variant="danger">Save</Button>
-            </Link>
+            <Button
+              variant="danger"
+              onClick={() => {
+                if (isNew) {
+                  dispatch(addAssignment({ ...form, course: cid }));
+                } else {
+                  dispatch(updateAssignment({ ...form }));
+                }
+                router.push(`/Courses/${cid}/Assignments`);
+              }}
+            >
+              Save
+            </Button>
           </Col>
         </Row>
       </Form>
