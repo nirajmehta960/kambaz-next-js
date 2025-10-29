@@ -1,39 +1,82 @@
+"use client";
 import Link from "next/link";
-import { FormControl } from "react-bootstrap";
+import { useRouter } from "next/navigation";
+import { setCurrentUser } from "../reducer";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
+import { FormControl, Button } from "react-bootstrap";
+
 export default function Signup() {
+  const [user, setUser] = useState<any>({
+    username: "",
+    password: "",
+    verifyPassword: "",
+  });
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  const signup = () => {
+    if (user.password !== user.verifyPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    if (!user.username || !user.password) {
+      alert("Please fill in all fields!");
+      return;
+    }
+
+    const newUser = {
+      _id: new Date().getTime().toString(),
+      username: user.username,
+      password: user.password,
+      firstName: "",
+      lastName: "",
+      email: "",
+      dob: "",
+      role: "STUDENT",
+    };
+
+    dispatch(setCurrentUser(newUser));
+
+    router.push("/Account/Profile");
+  };
+
   return (
     <div id="wd-signup-screen">
       <h1>Sign up</h1>
       <FormControl
-        defaultValue="niraj.mehta"
+        value={user.username}
+        onChange={(e) => setUser({ ...user, username: e.target.value })}
         placeholder="username"
         id="wd-username"
         className="mb-2"
       />
       <FormControl
-        defaultValue="Niraj@762483"
+        value={user.password}
+        onChange={(e) => setUser({ ...user, password: e.target.value })}
         placeholder="password"
         type="password"
         id="wd-password"
         className="mb-2"
       />
       <FormControl
-        defaultValue="Niraj@762483"
+        value={user.verifyPassword}
+        onChange={(e) => setUser({ ...user, verifyPassword: e.target.value })}
         placeholder="verify password"
         type="password"
         id="wd-password-verify"
         className="mb-2"
       />
-      <Link
+      <Button
         id="wd-signup-btn"
-        href="Profile"
+        onClick={signup}
         className="btn btn-primary w-100 mb-2"
       >
-        Sign up{" "}
-      </Link>
+        Sign up
+      </Button>
       <Link id="wd-signin-link" href="Signin">
-        {" "}
-        Sign in{" "}
+        Sign in
       </Link>
     </div>
   );

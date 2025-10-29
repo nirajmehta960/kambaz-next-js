@@ -6,7 +6,7 @@
     "firstName": "Tony",
     "lastName": "Stark",
     "email": "tony@stark.com",
-    "dob": "1970-05-29T00:00:00.000Z",
+    "dob": "1970-05-29",
     "role": "FACULTY",
     "loginId": "001234561S",
     "section": "S101",
@@ -15,17 +15,15 @@
   },
   {
     "_id": "234",
-    "username": "dark_knight",
-    "password": "wayne123",
-    "firstName": "Bruce",
-    "lastName": "Wayne",
-    "email": "bruce@wayne.com",
-    "dob": "1972-02-19",
+    "username": "niraj.mehta",
+    "password": "Niraj@762483",
+    "firstName": "Niraj",
+    "lastName": "Mehta",
+    "email": "niraj.mehta@northeastern.edu",
+    "dob": "2000-10-24",
     "role": "STUDENT",
     "loginId": "001234562S",
-    "section": "S101",
-    "lastActivity": "2020-11-02",
-    "totalActivity": "15:32:43"
+    "section": "S101"
   },
   {
     "_id": "345",

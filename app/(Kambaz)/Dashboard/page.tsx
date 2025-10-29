@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import * as db from "../Database";
 import { addNewCourse, deleteCourse, updateCourse } from "../Courses/reducer";
 import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
@@ -17,6 +18,7 @@ import {
 } from "react-bootstrap";
 export default function Dashboard() {
   const { courses } = useSelector((state: any) => state.coursesReducer);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
   const dispatch = useDispatch();
   const [course, setCourse] = useState<any>({ ...courses[0] });
 
@@ -74,7 +76,11 @@ export default function Dashboard() {
       <hr />
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
-          {courses.map((course: any) => (
+          {(currentUser ? courses.filter((c: any) =>
+            db.enrollments.some((enr: any) =>
+              enr.user === currentUser._id && enr.course === c._id
+            )
+          ) : courses).map((course: any) => (
             <Col className="wd-dashboard-course" style={{ width: "300px" }}>
               <Card>
                 <Link
