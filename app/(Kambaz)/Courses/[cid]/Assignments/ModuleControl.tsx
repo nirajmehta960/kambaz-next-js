@@ -1,8 +1,12 @@
 import { Button } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa6";
+import { useParams, useRouter } from "next/navigation";
 import { BsSearch } from "react-icons/bs";
+import Link from "next/link";
 
 export default function ModuleControl() {
+  const { cid } = useParams();
+  const router = useRouter();
   return (
     <div id="wd-assignments-controls" className="text-nowrap">
       <div
@@ -24,22 +28,19 @@ export default function ModuleControl() {
           style={{ height: "44px", borderLeft: "none" }}
         />
       </div>
-      <Button
-        variant="danger"
-        size="lg"
-        className="me-2 float-end"
+      <Link
+        href={`/Courses/${cid}/Assignments/new?new=true`}
+        className="btn btn-danger btn-lg me-1 float-end"
         id="wd-add-assignment"
-        style={{ height: "44px" }}
       >
         <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
         Assignment
-      </Button>
+      </Link>
       <Button
         variant="secondary"
         size="lg"
-        className="me-2 float-end"
+        className="me-1 float-end"
         id="wd-add-assignment-group"
-        style={{ height: "44px" }}
       >
         <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
         Group

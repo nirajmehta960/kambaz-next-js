@@ -1,5 +1,5 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import ListGroup from "react-bootstrap/esm/ListGroup";
 import ListGroupItem from "react-bootstrap/esm/ListGroupItem";
@@ -9,12 +9,31 @@ import AssignmentControlButtons from "./AssignmentControlButtons";
 import { BsGripVertical } from "react-icons/bs";
 import { BsFillCaretDownFill } from "react-icons/bs";
 import { BsPencilSquare } from "react-icons/bs";
-import * as db from "../../../Database";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteAssignment } from "./reducer";
+import { FaTrash } from "react-icons/fa";
+import { useState } from "react";
+import { Modal, Button } from "react-bootstrap";
 
 export default function Assignments() {
-  const params = useParams();
-  const cid = params.cid;
-  const assignments = db.assignments;
+  const { cid } = useParams();
+  const router = useRouter();
+  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+  const dispatch = useDispatch();
+  const [showDelete, setShowDelete] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "";
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      });
+    } catch (e) {
+      return dateStr;
+    }
+  };
   return (
     <div id="wd-assignments">
       <div className="clearfix mb-4">
@@ -60,18 +79,56 @@ export default function Assignments() {
                       </span>
                       <div className="wd-assignment-details text-body-secondary">
                         <span className="text-danger">{assignment.title}</span>{" "}
-                        | <strong>Not available until</strong> May {6 + index}{" "}
-                        at 12:00am | <strong>Due</strong> May {13 + index} at
-                        11:59pm | 100 pts
+                        | <strong>Not available until</strong>{" "}
+                        {formatDate(assignment.availableFrom)} |{" "}
+                        <strong>Due</strong> {formatDate(assignment.dueDate)} |{" "}
+                        {assignment.points ?? 0} pts
                       </div>
                     </span>
                   </Link>
-                  <ModuleControlButton />
+                  <span className="d-flex align-items-center me-2 float-end">
+                    <FaTrash
+                      className="text-danger me-2 mb-1"
+                      onClick={() => {
+                        setSelectedAssignment(assignment);
+                        setShowDelete(true);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    />
+                    <ModuleControlButton />
+                  </span>
                 </ListGroupItem>
               ))}
           </ListGroup>
         </ListGroupItem>
       </ListGroup>
+
+      <Modal show={showDelete} onHide={() => setShowDelete(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Assignment</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete{" "}
+          <strong>{selectedAssignment?.title}</strong> ? This action cannot be
+          undone.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDelete(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              if (selectedAssignment) {
+                dispatch(deleteAssignment(selectedAssignment._id));
+              }
+              setShowDelete(false);
+            }}
+          >
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
