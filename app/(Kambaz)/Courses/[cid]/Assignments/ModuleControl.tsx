@@ -3,10 +3,12 @@ import { FaPlus } from "react-icons/fa6";
 import { useParams, useRouter } from "next/navigation";
 import { BsSearch } from "react-icons/bs";
 import Link from "next/link";
+import { useSelector } from "react-redux";
 
 export default function ModuleControl() {
   const { cid } = useParams();
   const router = useRouter();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
   return (
     <div id="wd-assignments-controls" className="text-nowrap">
       <div
@@ -29,9 +31,10 @@ export default function ModuleControl() {
         />
       </div>
       <Link
-        href={`/Courses/${cid}/Assignments/new?new=true`}
-        className="btn btn-danger btn-lg me-1 float-end"
+        href={currentUser?.role === "FACULTY" ? `/Courses/${cid}/Assignments/new?new=true` : `#`}
+        className={`btn btn-danger btn-lg me-1 float-end ${currentUser?.role !== "FACULTY" ? "disabled" : ""}`}
         id="wd-add-assignment"
+        aria-disabled={currentUser?.role !== "FACULTY"}
       >
         <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
         Assignment

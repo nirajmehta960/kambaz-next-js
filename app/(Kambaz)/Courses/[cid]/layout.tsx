@@ -1,18 +1,34 @@
 "use client";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import CourseNavigation from "./Navigation";
 import Breadcrumb from "./Breadcrumb";
 import { FaAlignJustify } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export default function CoursesLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   const { cid } = useParams<{ cid: string }>();
   const { courses } = useSelector((state: any) => state.coursesReducer);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
+  const router = useRouter();
   const course = courses.find((course: any) => course._id === cid);
   const [showNav, setShowNav] = useState(true);
+
+  useEffect(() => {
+    if (!currentUser) {
+      router.push("/Dashboard");
+      return;
+    }
+    const allowed = enrollments.some(
+      (e: any) => e.user === currentUser._id && e.course === cid
+    );
+    if (!allowed) {
+      router.push("/Dashboard");
+    }
+  }, [cid, currentUser, enrollments, router]);
   return (
     <div id="wd-courses">
       <h2 className="text-danger">
