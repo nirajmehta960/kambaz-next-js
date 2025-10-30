@@ -19,6 +19,7 @@ export default function Assignments() {
   const { cid } = useParams();
   const router = useRouter();
   const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
   const dispatch = useDispatch();
   const [showDelete, setShowDelete] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
@@ -87,14 +88,16 @@ export default function Assignments() {
                     </span>
                   </Link>
                   <span className="d-flex align-items-center me-2 float-end">
-                    <FaTrash
-                      className="text-danger me-2 mb-1"
-                      onClick={() => {
-                        setSelectedAssignment(assignment);
-                        setShowDelete(true);
-                      }}
-                      style={{ cursor: "pointer" }}
-                    />
+                    {currentUser?.role === "FACULTY" && (
+                      <FaTrash
+                        className="text-danger me-2 mb-1"
+                        onClick={() => {
+                          setSelectedAssignment(assignment);
+                          setShowDelete(true);
+                        }}
+                        style={{ cursor: "pointer" }}
+                      />
+                    )}
                     <ModuleControlButton />
                   </span>
                 </ListGroupItem>

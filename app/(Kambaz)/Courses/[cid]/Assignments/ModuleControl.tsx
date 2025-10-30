@@ -30,24 +30,27 @@ export default function ModuleControl() {
           style={{ height: "44px", borderLeft: "none" }}
         />
       </div>
-      <Link
-        href={currentUser?.role === "FACULTY" ? `/Courses/${cid}/Assignments/new?new=true` : `#`}
-        className={`btn btn-danger btn-lg me-1 float-end ${currentUser?.role !== "FACULTY" ? "disabled" : ""}`}
-        id="wd-add-assignment"
-        aria-disabled={currentUser?.role !== "FACULTY"}
-      >
-        <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
-        Assignment
-      </Link>
-      <Button
-        variant="secondary"
-        size="lg"
-        className="me-1 float-end"
-        id="wd-add-assignment-group"
-      >
-        <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
-        Group
-      </Button>
+      {currentUser?.role === "FACULTY" && (
+        <>
+          <Link
+            href={`/Courses/${cid}/Assignments/new?new=true`}
+            className="btn btn-danger btn-lg me-1 float-end"
+            id="wd-add-assignment"
+          >
+            <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
+            Assignment
+          </Link>
+          <Button
+            variant="secondary"
+            size="lg"
+            className="me-1 float-end"
+            id="wd-add-assignment-group"
+          >
+            <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
+            Group
+          </Button>
+        </>
+      )}
     </div>
   );
 }
