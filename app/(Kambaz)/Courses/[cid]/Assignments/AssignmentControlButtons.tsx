@@ -9,15 +9,13 @@ export default function AssignmentControlButtons() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   return (
     <div className="float-end">
-      <BsPlus
-        className="fs-2"
-        onClick={() => {
-          if (currentUser?.role === "FACULTY") {
-            router.push(`/Courses/${cid}/Assignments/new`);
-          }
-        }}
-        style={{ cursor: currentUser?.role === "FACULTY" ? "pointer" : "not-allowed", opacity: currentUser?.role === "FACULTY" ? 1 : 0.5 }}
-      />
+      {currentUser?.role === "FACULTY" && (
+        <BsPlus
+          className="fs-2"
+          onClick={() => router.push(`/Courses/${cid}/Assignments/new`)}
+          style={{ cursor: "pointer" }}
+        />
+      )}
       <IoEllipsisVertical className="fs-4" />
     </div>
   );
