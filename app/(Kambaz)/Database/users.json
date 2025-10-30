@@ -1,11 +1,11 @@
 [
   {
     "_id": "123",
-    "username": "iron_man",
-    "password": "stark123",
-    "firstName": "Tony",
-    "lastName": "Stark",
-    "email": "tony@stark.com",
+    "username": "jose_anz",
+    "password": "joseanz@123",
+    "firstName": "Jose",
+    "lastName": "Annunziato",
+    "email": "jannunzi@gmail.com",
     "dob": "1970-05-29",
     "role": "FACULTY",
     "loginId": "001234561S",
@@ -111,8 +111,8 @@
   },
   {
     "_id": "777",
-    "username": "ada",
-    "password": "123",
+    "username": "ada_lovelace",
+    "password": "ada@lovelace123",
     "firstName": "Ada",
     "lastName": "Lovelace",
     "email": "ada@lovelace.com",
