@@ -7,6 +7,7 @@ import {
 } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa6";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import GreenCheckmark from "./GreenCheckmark";
 import UnpublishIcon from "./UnpublishIcon";
 import ModuleEditor from "./ModuleEditor";
@@ -23,19 +24,25 @@ export default function ModulesControls({
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   return (
     <div id="wd-modules-controls" className="text-nowrap">
-      <Button
-        variant="danger"
-        size="lg"
-        className="me-1 float-end"
-        id="wd-add-module-btn"
-        onClick={handleShow}
-      >
-        <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
-        Module
-      </Button>
+      {currentUser?.role === "FACULTY" && (
+        <Button
+          variant="danger"
+          size="lg"
+          className="me-1 float-end"
+          id="wd-add-module-btn"
+          onClick={handleShow}
+        >
+          <FaPlus
+            className="position-relative me-2"
+            style={{ bottom: "1px" }}
+          />
+          Module
+        </Button>
+      )}
       <ModuleEditor
         show={show}
         handleClose={handleClose}

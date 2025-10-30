@@ -39,24 +39,27 @@ export default function Modules() {
               key={module._id}
               className="wd-module p-0 mb-5 fs-5 border-gray"
             >
-              <div className="wd-title p-3 ps-2 bg-secondary">
-                <BsGripVertical className="me-2 fs-3" />
-                {!module.editing && module.name}
-                {module.editing && (
-                  <FormControl
-                    defaultValue={module.name}
-                    onChange={(e) =>
-                      dispatch(
-                        updateModule({ ...module, name: e.target.value })
-                      )
-                    }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        dispatch(updateModule({ ...module, editing: false }));
+              <div className="wd-title p-3 ps-2 bg-secondary d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center flex-grow-1 me-3">
+                  <BsGripVertical className="me-2 fs-3" />
+                  {!module.editing && <span>{module.name}</span>}
+                  {module.editing && (
+                    <FormControl
+                      defaultValue={module.name}
+                      onChange={(e) =>
+                        dispatch(
+                          updateModule({ ...module, name: e.target.value })
+                        )
                       }
-                    }}
-                  />
-                )}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          dispatch(updateModule({ ...module, editing: false }));
+                        }
+                      }}
+                      style={{ maxWidth: "300px" }}
+                    />
+                  )}
+                </div>
                 <ModuleControlButtons
                   moduleId={module._id}
                   deleteModule={(moduleId) => {
