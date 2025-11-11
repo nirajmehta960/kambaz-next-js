@@ -10,19 +10,48 @@ import { BsGripVertical } from "react-icons/bs";
 import { BsFillCaretDownFill } from "react-icons/bs";
 import { BsPencilSquare } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteAssignment } from "./reducer";
+import { deleteAssignment, setAssignments } from "./reducer";
 import { FaTrash } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Modal, Button } from "react-bootstrap";
+import * as client from "./client";
 
 export default function Assignments() {
   const { cid } = useParams();
+  const courseId = Array.isArray(cid) ? cid[0] : cid;
   const router = useRouter();
   const { assignments } = useSelector((state: any) => state.assignmentsReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const dispatch = useDispatch();
   const [showDelete, setShowDelete] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
+
+  const fetchAssignments = async () => {
+    if (!courseId) return;
+    try {
+      const assignments = await client.findAssignmentsForCourse(courseId);
+      dispatch(setAssignments(assignments));
+    } catch (error) {
+      console.error("Error fetching assignments:", error);
+      dispatch(setAssignments([]));
+    }
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  }, [courseId]);
+
+  const onDeleteAssignment = async (assignmentId: string) => {
+    try {
+      await client.deleteAssignment(assignmentId);
+      dispatch(
+        setAssignments(assignments.filter((a: any) => a._id !== assignmentId))
+      );
+    } catch (error) {
+      console.error("Error deleting assignment:", error);
+    }
+  };
+
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "";
     try {
@@ -59,49 +88,55 @@ export default function Assignments() {
             className="wd-assignment-list rounded-0"
             id="wd-assignment-list"
           >
-            {assignments
-              .filter((assignment: any) => assignment.course === cid)
-              .map((assignment: any, index: number) => (
-                <ListGroupItem
-                  key={assignment._id}
-                  className="wd-assignment-list-item list-group-item-action p-2 ps-1 d-flex justify-content-between align-items-center"
-                >
-                  <span className="d-flex align-items-center me-2">
-                    <BsGripVertical className="fs-3" />
-                    <BsPencilSquare className="text-success me-2 fs-4" />
-                  </span>
+            {assignments.map((assignment: any, index: number) => (
+              <ListGroupItem
+                key={assignment._id}
+                className="wd-assignment-list-item list-group-item-action p-2 ps-1 d-flex justify-content-between align-items-center"
+              >
+                <span className="d-flex align-items-center me-2">
+                  <BsGripVertical className="fs-3" />
                   <Link
-                    href={`/Courses/${cid}/Assignments/${assignment._id}`}
-                    className="d-flex text-decoration-none flex-grow-1 me-3"
+                    href={`/Courses/${courseId}/Assignments/${assignment._id}`}
+                    className="text-decoration-none"
                   >
-                    <span>
-                      <span className="wd-assignment-link fw-semibold text-decoration-none fs-5">
-                        {assignment._id}
-                      </span>
-                      <div className="wd-assignment-details text-body-secondary">
-                        <span className="text-danger">{assignment.title}</span>{" "}
-                        | <strong>Not available until</strong>{" "}
-                        {formatDate(assignment.availableFrom)} |{" "}
-                        <strong>Due</strong> {formatDate(assignment.dueDate)} |{" "}
-                        {assignment.points ?? 0} pts
-                      </div>
-                    </span>
+                    <BsPencilSquare
+                      className="text-success me-2 fs-4"
+                      style={{ cursor: "pointer" }}
+                    />
                   </Link>
-                  <span className="d-flex align-items-center me-2 float-end">
-                    {currentUser?.role === "FACULTY" && (
-                      <FaTrash
-                        className="text-danger me-2 mb-1"
-                        onClick={() => {
-                          setSelectedAssignment(assignment);
-                          setShowDelete(true);
-                        }}
-                        style={{ cursor: "pointer" }}
-                      />
-                    )}
-                    <ModuleControlButton />
+                </span>
+                <Link
+                  href={`/Courses/${courseId}/Assignments/${assignment._id}`}
+                  className="d-flex text-decoration-none flex-grow-1 me-3"
+                >
+                  <span>
+                    <span className="wd-assignment-link fw-semibold text-decoration-none fs-5">
+                      {assignment._id}
+                    </span>
+                    <div className="wd-assignment-details text-body-secondary">
+                      <span className="text-danger">{assignment.title}</span> |{" "}
+                      <strong>Not available until</strong>{" "}
+                      {formatDate(assignment.availableFrom)} |{" "}
+                      <strong>Due</strong> {formatDate(assignment.dueDate)} |{" "}
+                      {assignment.points ?? 0} pts
+                    </div>
                   </span>
-                </ListGroupItem>
-              ))}
+                </Link>
+                <span className="d-flex align-items-center me-2 float-end">
+                  {currentUser?.role === "FACULTY" && (
+                    <FaTrash
+                      className="text-danger me-2 mb-1"
+                      onClick={() => {
+                        setSelectedAssignment(assignment);
+                        setShowDelete(true);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    />
+                  )}
+                  <ModuleControlButton />
+                </span>
+              </ListGroupItem>
+            ))}
           </ListGroup>
         </ListGroupItem>
       </ListGroup>
@@ -123,7 +158,7 @@ export default function Assignments() {
             variant="danger"
             onClick={() => {
               if (selectedAssignment) {
-                dispatch(deleteAssignment(selectedAssignment._id));
+                onDeleteAssignment(selectedAssignment._id);
               }
               setShowDelete(false);
             }}

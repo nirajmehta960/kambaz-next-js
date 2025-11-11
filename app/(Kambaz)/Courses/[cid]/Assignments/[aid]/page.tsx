@@ -4,11 +4,13 @@ import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { addAssignment, updateAssignment } from "../reducer";
+import { setAssignments } from "../reducer";
 import { useEffect, useState } from "react";
+import * as client from "../client";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
+  const courseId = Array.isArray(cid) ? cid[0] : cid;
   const router = useRouter();
   const dispatch = useDispatch();
   const { assignments } = useSelector((state: any) => state.assignmentsReducer);
@@ -24,13 +26,27 @@ export default function AssignmentEditor() {
       dueDate: "",
       availableFrom: "",
       availableUntil: "",
-      course: cid,
+      course: courseId,
     }
   );
 
   useEffect(() => {
     if (existing) setForm(existing);
   }, [existing]);
+
+  const onCreateAssignment = async () => {
+    if (!courseId) return;
+    const assignment = await client.createAssignmentForCourse(courseId, form);
+    dispatch(setAssignments([...assignments, assignment]));
+  };
+
+  const onUpdateAssignment = async () => {
+    await client.updateAssignment(form);
+    const newAssignments = assignments.map((a: any) =>
+      a._id === form._id ? form : a
+    );
+    dispatch(setAssignments(newAssignments));
+  };
   return (
     <Container fluid id="wd-assignments-editor" className="py-2">
       <Form>
@@ -217,18 +233,18 @@ export default function AssignmentEditor() {
             lg={4}
             className="d-flex justify-content-end gap-2"
           >
-            <Link href={`/Courses/${cid}/Assignments`}>
+            <Link href={`/Courses/${courseId}/Assignments`}>
               <Button variant="light">Cancel</Button>
             </Link>
             <Button
               variant="danger"
-              onClick={() => {
+              onClick={async () => {
                 if (isNew) {
-                  dispatch(addAssignment({ ...form, course: cid }));
+                  await onCreateAssignment();
                 } else {
-                  dispatch(updateAssignment({ ...form }));
+                  await onUpdateAssignment();
                 }
-                router.push(`/Courses/${cid}/Assignments`);
+                router.push(`/Courses/${courseId}/Assignments`);
               }}
             >
               Save
