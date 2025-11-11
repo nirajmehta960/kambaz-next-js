@@ -1,9 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import * as db from "../Database";
-import { addNewCourse, deleteCourse, updateCourse } from "../Courses/reducer";
-import { v4 as uuidv4 } from "uuid";
+import * as client from "../Courses/client";
+import { setCourses } from "../Courses/reducer";
 import Link from "next/link";
 import {
   Row,
@@ -17,13 +16,69 @@ import {
   FormControl,
   Modal,
 } from "react-bootstrap";
+
 export default function Dashboard() {
   const { courses } = useSelector((state: any) => state.coursesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
   const dispatch = useDispatch();
-  const [course, setCourse] = useState<any>({ ...courses[0] });
   const [showAll, setShowAll] = useState(false);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
+
+  const fetchCourses = async () => {
+    try {
+      if (showAll) {
+        const allCourses = await client.fetchAllCourses();
+        dispatch(setCourses(allCourses));
+        // Also fetch enrolled courses to know which ones user is enrolled in
+        const enrolledCourses = await client.findMyCourses();
+        setEnrolledCourseIds(enrolledCourses.map((c: any) => c._id));
+      } else {
+        const enrolledCourses = await client.findMyCourses();
+        dispatch(setCourses(enrolledCourses));
+        setEnrolledCourseIds(enrolledCourses.map((c: any) => c._id));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onAddNewCourse = async (course: any) => {
+    const newCourse = await client.createCourse(course);
+    dispatch(setCourses([...courses, newCourse]));
+    // New course is automatically enrolled, so add to enrolled list
+    setEnrolledCourseIds([...enrolledCourseIds, newCourse._id]);
+  };
+
+  const onDeleteCourse = async (courseId: string) => {
+    await client.deleteCourse(courseId);
+    dispatch(
+      setCourses(courses.filter((course: any) => course._id !== courseId))
+    );
+    // Remove from enrolled list if it was there
+    setEnrolledCourseIds(enrolledCourseIds.filter((id) => id !== courseId));
+  };
+
+  const onUpdateCourse = async (course: any) => {
+    await client.updateCourse(course);
+    dispatch(
+      setCourses(
+        courses.map((c: any) => {
+          if (c._id === course._id) {
+            return course;
+          } else {
+            return c;
+          }
+        })
+      )
+    );
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchCourses();
+    }
+  }, [currentUser, showAll]);
+
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [editableCourse, setEditableCourse] = useState<any>({
@@ -79,32 +134,21 @@ export default function Dashboard() {
           ? `Enrolled Courses (0)`
           : showAll
           ? `Published Courses (${courses.length})`
-          : `Enrolled Courses (${
-              enrollments.filter((e: any) => e.user === currentUser._id).length
-            })`}
+          : `Enrolled Courses (${courses.length})`}
       </h2>{" "}
       <hr />
       <div id="wd-dashboard-courses">
         {currentUser ? (
           <Row xs={1} md={5} className="g-4">
-            {(showAll || !currentUser
-              ? courses
-              : courses.filter((c: any) =>
-                  enrollments.some(
-                    (enr: any) =>
-                      enr.user === currentUser._id && enr.course === c._id
-                  )
-                )
-            ).map((course: any) => (
+            {courses.map((course: any) => (
               <Col className="wd-dashboard-course" style={{ width: "300px" }}>
                 <Card className="h-100" style={{ height: 380 }}>
                   {(() => {
+                    // Check if user can access this course (enrolled or faculty)
                     const canAccess =
                       currentUser &&
-                      enrollments.some(
-                        (e: any) =>
-                          e.user === currentUser._id && e.course === course._id
-                      );
+                      (enrolledCourseIds.includes(course._id) ||
+                        currentUser.role === "FACULTY");
                     return canAccess ? (
                       <Link
                         href={`/Courses/${course._id}/Home`}
@@ -128,13 +172,11 @@ export default function Dashboard() {
                   })()}
                   <CardBody className="card-body">
                     {(() => {
+                      // Check if user can access this course (enrolled or faculty)
                       const canAccess =
                         currentUser &&
-                        enrollments.some(
-                          (e: any) =>
-                            e.user === currentUser._id &&
-                            e.course === course._id
-                        );
+                        (enrolledCourseIds.includes(course._id) ||
+                          currentUser.role === "FACULTY");
                       return canAccess ? (
                         <Link
                           href={`/Courses/${course._id}/Home`}
@@ -166,13 +208,8 @@ export default function Dashboard() {
                     })()}
                     <div className="d-flex gap-2 align-items-center mt-2">
                       {(() => {
-                        const isEnrolled = currentUser
-                          ? enrollments.some(
-                              (e: any) =>
-                                e.user === currentUser._id &&
-                                e.course === course._id
-                            )
-                          : false;
+                        const isEnrolled =
+                          currentUser && enrolledCourseIds.includes(course._id);
                         if (isEnrolled) {
                           return (
                             <Link
@@ -191,11 +228,8 @@ export default function Dashboard() {
                         );
                       })()}
                       {(() => {
-                        const isEnrolled = enrollments.some(
-                          (e: any) =>
-                            e.user === currentUser?._id &&
-                            e.course === course._id
-                        );
+                        const isEnrolled =
+                          currentUser && enrolledCourseIds.includes(course._id);
                         if (currentUser?.role === "FACULTY") {
                           return isEnrolled ? (
                             <>
@@ -204,7 +238,6 @@ export default function Dashboard() {
                                 onClick={(event) => {
                                   event.preventDefault();
                                   event.stopPropagation();
-                                  setCourse(course);
                                   setModalMode("edit");
                                   setEditableCourse({ ...course });
                                   setShowModal(true);
@@ -217,7 +250,7 @@ export default function Dashboard() {
                                 onClick={(event) => {
                                   event.preventDefault();
                                   event.stopPropagation();
-                                  dispatch(deleteCourse(course._id));
+                                  onDeleteCourse(course._id);
                                 }}
                                 className="btn btn-danger"
                                 id="wd-delete-course-click"
@@ -325,13 +358,11 @@ export default function Dashboard() {
           </Button>
           <Button
             variant="primary"
-            onClick={() => {
+            onClick={async () => {
               if (modalMode === "add") {
-                dispatch(addNewCourse(editableCourse));
-                setCourse(editableCourse);
+                await onAddNewCourse(editableCourse);
               } else {
-                dispatch(updateCourse(editableCourse));
-                setCourse(editableCourse);
+                await onUpdateCourse(editableCourse);
               }
               setShowModal(false);
             }}
