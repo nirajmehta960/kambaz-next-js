@@ -1,81 +1,46 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/dist/client/components/navigation";
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { FormControl, Button } from "react-bootstrap";
+import * as client from "../client";
 
 export default function Signup() {
-  const [user, setUser] = useState<any>({
-    username: "",
-    password: "",
-    verifyPassword: "",
-  });
+  const [user, setUser] = useState<any>({});
   const dispatch = useDispatch();
-  const router = useRouter();
 
-  const signup = () => {
-    if (user.password !== user.verifyPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-
-    if (!user.username || !user.password) {
-      alert("Please fill in all fields!");
-      return;
-    }
-
-    const newUser = {
-      _id: new Date().getTime().toString(),
-      username: user.username,
-      password: user.password,
-      firstName: "",
-      lastName: "",
-      email: "",
-      dob: "",
-      role: "STUDENT",
-    };
-
-    dispatch(setCurrentUser(newUser));
-
-    router.push("/Account/Profile");
+  const signup = async () => {
+    const currentUser = await client.signup(user);
+    dispatch(setCurrentUser(currentUser));
+    redirect("/Profile");
   };
-
   return (
-    <div id="wd-signup-screen">
+    <div className="wd-signup-screen">
       <h1>Sign up</h1>
       <FormControl
         value={user.username}
         onChange={(e) => setUser({ ...user, username: e.target.value })}
+        className="wd-username b-2"
         placeholder="username"
-        id="wd-username"
-        className="mb-2"
       />
       <FormControl
         value={user.password}
         onChange={(e) => setUser({ ...user, password: e.target.value })}
+        className="wd-password mb-2"
         placeholder="password"
         type="password"
-        id="wd-password"
-        className="mb-2"
       />
-      <FormControl
-        value={user.verifyPassword}
-        onChange={(e) => setUser({ ...user, verifyPassword: e.target.value })}
-        placeholder="verify password"
-        type="password"
-        id="wd-password-verify"
-        className="mb-2"
-      />
-      <Button
-        id="wd-signup-btn"
+      <button
         onClick={signup}
-        className="btn btn-primary w-100 mb-2"
+        className="wd-signup-btn btn btn-primary mb-2 w-100"
       >
-        Sign up
-      </Button>
-      <Link id="wd-signin-link" href="Signin">
+        {" "}
+        Sign up{" "}
+      </button>
+      <br />
+      <Link href="/Account/Signin" className="wd-signin-link">
         Sign in
       </Link>
     </div>

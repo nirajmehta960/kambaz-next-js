@@ -1,15 +1,22 @@
 "use client";
-import { useRouter } from "next/navigation";
+import * as client from "../client";
+import { redirect, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setCurrentUser } from "../reducer";
-import { Button, FormControl } from "react-bootstrap";
+import { FormControl } from "react-bootstrap";
 
 export default function Profile() {
   const [profile, setProfile] = useState<any>({});
   const dispatch = useDispatch();
   const router = useRouter();
+
   const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+  const updateProfile = async () => {
+    const updatedProfile = await client.updateUser(profile);
+    dispatch(setCurrentUser(updatedProfile));
+  };
 
   useEffect(() => {
     if (!currentUser) {
@@ -19,9 +26,10 @@ export default function Profile() {
     setProfile(currentUser);
   }, [currentUser, router]);
 
-  const signout = () => {
+  const signout = async () => {
+    await client.signout();
     dispatch(setCurrentUser(null));
-    router.push("/Account/Signin");
+    redirect("/Account/Signin");
   };
 
   return (
@@ -93,14 +101,16 @@ export default function Profile() {
             <option value="FACULTY">Faculty</option>
             <option value="STUDENT">Student</option>
           </FormControl>
-          <Button
-            onClick={signout}
-            className="w-100 mb-2"
-            variant="danger"
-            id="wd-signout-btn"
+          <button
+            onClick={updateProfile}
+            className="btn btn-primary w-100 mb-2"
+            id="wd-update-profile-btn"
           >
+            Update
+          </button>
+          <button onClick={signout} className="btn btn-danger w-100 mb-2">
             Sign out
-          </Button>
+          </button>
         </div>
       )}
     </div>
