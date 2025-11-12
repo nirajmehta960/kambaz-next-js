@@ -1,6 +1,6 @@
 "use client";
 import * as client from "../client";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setCurrentUser } from "../reducer";
@@ -36,12 +36,12 @@ export default function Profile() {
       console.error("Error updating profile:", error);
       if (error.response?.status === 401) {
         setErrorMessage(
-          "Authentication failed. Please sign in again. If the problem persists, check your server CORS configuration to allow credentials from this domain."
+          "Your session has expired. Please sign in again to update your profile."
         );
-        // Clear error message after 5 seconds
+        // Redirect to signin after showing error message
         setTimeout(() => {
-          setErrorMessage("");
-        }, 5000);
+          router.push("/Account/Signin");
+        }, 3000);
       } else {
         const errorMsg =
           error.response?.data?.message ||
@@ -64,9 +64,14 @@ export default function Profile() {
   }, [currentUser, router]);
 
   const signout = async () => {
-    await client.signout();
-    dispatch(setCurrentUser(null));
-    redirect("/Account/Signin");
+    try {
+      await client.signout();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    } finally {
+      dispatch(setCurrentUser(null));
+      router.push("/Account/Signin");
+    }
   };
 
   return (
