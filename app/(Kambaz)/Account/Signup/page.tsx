@@ -12,9 +12,14 @@ export default function Signup() {
   const dispatch = useDispatch();
 
   const signup = async () => {
-    const currentUser = await client.signup(user);
-    dispatch(setCurrentUser(currentUser));
-    redirect("/Account/Profile");
+    try {
+      const currentUser = await client.signup(user);
+      dispatch(setCurrentUser(currentUser));
+      redirect("/Account/Profile");
+    } catch (error) {
+      console.error("Error signing up:", error);
+      // Optionally show user-friendly error message
+    }
   };
 
   return (

@@ -21,10 +21,15 @@ export default function Modules() {
 
   const onCreateModuleForCourse = async () => {
     if (!courseId) return;
-    const newModule = { name: moduleName };
-    const module = await client.createModuleForCourse(courseId, newModule);
-    dispatch(setModules([...modules, module]));
-    setModuleName("");
+    try {
+      const newModule = { name: moduleName };
+      const module = await client.createModuleForCourse(courseId, newModule);
+      dispatch(setModules([...modules, module]));
+      setModuleName("");
+    } catch (error) {
+      console.error("Error creating module:", error);
+      // Optionally show user-friendly error message
+    }
   };
 
   const onRemoveModule = async (moduleId: string) => {

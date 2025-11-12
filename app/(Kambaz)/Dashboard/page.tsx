@@ -56,34 +56,49 @@ export default function Dashboard() {
   };
 
   const onAddNewCourse = async (course: any) => {
-    const newCourse = await client.createCourse(course);
-    dispatch(setCourses([...courses, newCourse]));
-    // New course is automatically enrolled, so add to enrolled list
-    setEnrolledCourseIds([...enrolledCourseIds, newCourse._id]);
+    try {
+      const newCourse = await client.createCourse(course);
+      dispatch(setCourses([...courses, newCourse]));
+      // New course is automatically enrolled, so add to enrolled list
+      setEnrolledCourseIds([...enrolledCourseIds, newCourse._id]);
+    } catch (error) {
+      console.error("Error creating course:", error);
+      // Optionally show user-friendly error message
+    }
   };
 
   const onDeleteCourse = async (courseId: string) => {
-    await client.deleteCourse(courseId);
-    dispatch(
-      setCourses(courses.filter((course: any) => course._id !== courseId))
-    );
-    // Remove from enrolled list if it was there
-    setEnrolledCourseIds(enrolledCourseIds.filter((id) => id !== courseId));
+    try {
+      await client.deleteCourse(courseId);
+      dispatch(
+        setCourses(courses.filter((course: any) => course._id !== courseId))
+      );
+      // Remove from enrolled list if it was there
+      setEnrolledCourseIds(enrolledCourseIds.filter((id) => id !== courseId));
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      // Optionally show user-friendly error message
+    }
   };
 
   const onUpdateCourse = async (course: any) => {
-    await client.updateCourse(course);
-    dispatch(
-      setCourses(
-        courses.map((c: any) => {
-          if (c._id === course._id) {
-            return course;
-          } else {
-            return c;
-          }
-        })
-      )
-    );
+    try {
+      await client.updateCourse(course);
+      dispatch(
+        setCourses(
+          courses.map((c: any) => {
+            if (c._id === course._id) {
+              return course;
+            } else {
+              return c;
+            }
+          })
+        )
+      );
+    } catch (error) {
+      console.error("Error updating course:", error);
+      // Optionally show user-friendly error message
+    }
   };
 
   useEffect(() => {
@@ -154,7 +169,11 @@ export default function Dashboard() {
         {currentUser ? (
           <Row xs={1} md={5} className="g-4">
             {courses.map((course: any) => (
-              <Col className="wd-dashboard-course" style={{ width: "300px" }}>
+              <Col
+                key={course._id}
+                className="wd-dashboard-course"
+                style={{ width: "300px" }}
+              >
                 <Card className="h-100" style={{ height: 380 }}>
                   {(() => {
                     // Check if user can access this course (enrolled or faculty)
