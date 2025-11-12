@@ -36,16 +36,26 @@ export default function AssignmentEditor() {
 
   const onCreateAssignment = async () => {
     if (!courseId) return;
-    const assignment = await client.createAssignmentForCourse(courseId, form);
-    dispatch(setAssignments([...assignments, assignment]));
+    try {
+      const assignment = await client.createAssignmentForCourse(courseId, form);
+      dispatch(setAssignments([...assignments, assignment]));
+    } catch (error) {
+      console.error("Error creating assignment:", error);
+      // Optionally show user-friendly error message
+    }
   };
 
   const onUpdateAssignment = async () => {
-    await client.updateAssignment(form);
-    const newAssignments = assignments.map((a: any) =>
-      a._id === form._id ? form : a
-    );
-    dispatch(setAssignments(newAssignments));
+    try {
+      await client.updateAssignment(form);
+      const newAssignments = assignments.map((a: any) =>
+        a._id === form._id ? form : a
+      );
+      dispatch(setAssignments(newAssignments));
+    } catch (error) {
+      console.error("Error updating assignment:", error);
+      // Optionally show user-friendly error message
+    }
   };
   return (
     <Container fluid id="wd-assignments-editor" className="py-2">

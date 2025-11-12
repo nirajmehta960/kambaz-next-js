@@ -9,6 +9,7 @@ import { FormControl, Alert } from "react-bootstrap";
 export default function Profile() {
   const [profile, setProfile] = useState<any>({});
   const [successMessage, setSuccessMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -16,6 +17,14 @@ export default function Profile() {
 
   const updateProfile = async () => {
     try {
+      setErrorMessage("");
+      setSuccessMessage("");
+
+      if (!profile._id) {
+        setErrorMessage("Profile data is not loaded. Please refresh the page.");
+        return;
+      }
+
       const updatedProfile = await client.updateUser(profile);
       dispatch(setCurrentUser(updatedProfile));
       setSuccessMessage("Profile updated successfully!");
@@ -23,8 +32,26 @@ export default function Profile() {
       setTimeout(() => {
         setSuccessMessage("");
       }, 3000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile:", error);
+      if (error.response?.status === 401) {
+        setErrorMessage(
+          "Authentication failed. Please sign in again. If the problem persists, check your server CORS configuration to allow credentials from this domain."
+        );
+        // Clear error message after 5 seconds
+        setTimeout(() => {
+          setErrorMessage("");
+        }, 5000);
+      } else {
+        const errorMsg =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update profile. Please try again.";
+        setErrorMessage(errorMsg);
+        setTimeout(() => {
+          setErrorMessage("");
+        }, 5000);
+      }
     }
   };
 
@@ -48,6 +75,11 @@ export default function Profile() {
       {successMessage && (
         <Alert variant="success" className="mb-2">
           {successMessage}
+        </Alert>
+      )}
+      {errorMessage && (
+        <Alert variant="danger" className="mb-2">
+          {errorMessage}
         </Alert>
       )}
       {profile && (

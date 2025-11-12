@@ -16,10 +16,15 @@ export default function Signin() {
   const router = useRouter();
 
   const signin = async () => {
-    const user = await client.signin(credentials);
-    if (!user) return;
-    dispatch(setCurrentUser(user));
-    redirect("/Dashboard");
+    try {
+      const user = await client.signin(credentials);
+      if (!user) return;
+      dispatch(setCurrentUser(user));
+      redirect("/Dashboard");
+    } catch (error) {
+      console.error("Error signing in:", error);
+      // Optionally show user-friendly error message
+    }
   };
 
   return (
