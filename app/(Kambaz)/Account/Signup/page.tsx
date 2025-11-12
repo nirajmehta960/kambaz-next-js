@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { redirect } from "next/dist/client/components/navigation";
+import { useRouter } from "next/navigation";
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
@@ -10,12 +10,13 @@ import * as client from "../client";
 export default function Signup() {
   const [user, setUser] = useState<any>({});
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const signup = async () => {
     try {
       const currentUser = await client.signup(user);
       dispatch(setCurrentUser(currentUser));
-      redirect("/Account/Profile");
+      router.push("/Account/Profile");
     } catch (error) {
       console.error("Error signing up:", error);
       // Optionally show user-friendly error message

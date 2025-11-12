@@ -1,7 +1,7 @@
 "use client";
 import * as client from "../client";
 import Link from "next/link";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
@@ -20,7 +20,7 @@ export default function Signin() {
       const user = await client.signin(credentials);
       if (!user) return;
       dispatch(setCurrentUser(user));
-      redirect("/Dashboard");
+      router.push("/Dashboard");
     } catch (error) {
       console.error("Error signing in:", error);
       // Optionally show user-friendly error message
