@@ -14,15 +14,16 @@ export default function Signup() {
   const signup = async () => {
     const currentUser = await client.signup(user);
     dispatch(setCurrentUser(currentUser));
-    redirect("/Profile");
+    redirect("/Account/Profile");
   };
+
   return (
     <div className="wd-signup-screen">
       <h1>Sign up</h1>
       <FormControl
         value={user.username}
         onChange={(e) => setUser({ ...user, username: e.target.value })}
-        className="wd-username b-2"
+        className="wd-username mb-2"
         placeholder="username"
       />
       <FormControl
