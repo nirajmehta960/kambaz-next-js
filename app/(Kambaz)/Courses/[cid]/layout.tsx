@@ -3,8 +3,10 @@ import { ReactNode, useEffect, useState } from "react";
 import CourseNavigation from "./Navigation";
 import Breadcrumb from "./Breadcrumb";
 import { FaAlignJustify } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
+import * as enrollmentsClient from "../../Enrollments/client";
+import { setEnrollments } from "../../Enrollments/reducer";
 
 export default function CoursesLayout({
   children,
@@ -13,9 +15,26 @@ export default function CoursesLayout({
   const { courses } = useSelector((state: any) => state.coursesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
+  const dispatch = useDispatch();
   const router = useRouter();
   const course = courses.find((course: any) => course._id === cid);
   const [showNav, setShowNav] = useState(true);
+
+  useEffect(() => {
+    const fetchEnrollments = async () => {
+      try {
+        const enrollmentsData =
+          await enrollmentsClient.findEnrollmentsForUser();
+        dispatch(setEnrollments(enrollmentsData));
+      } catch (error) {
+        console.error("Error fetching enrollments:", error);
+      }
+    };
+
+    if (currentUser) {
+      fetchEnrollments();
+    }
+  }, [currentUser, dispatch]);
 
   useEffect(() => {
     if (!currentUser) {

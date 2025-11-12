@@ -2,7 +2,9 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import * as client from "../Courses/client";
+import * as enrollmentsClient from "../Enrollments/client";
 import { setCourses } from "../Courses/reducer";
+import { setEnrollments } from "../Enrollments/reducer";
 import Link from "next/link";
 import {
   Row,
@@ -24,18 +26,29 @@ export default function Dashboard() {
   const [showAll, setShowAll] = useState(false);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
 
+  const fetchEnrollments = async () => {
+    try {
+      const enrollments = await enrollmentsClient.findEnrollmentsForUser();
+      dispatch(setEnrollments(enrollments));
+      setEnrolledCourseIds(enrollments.map((e: any) => e.course));
+    } catch (error) {
+      console.error("Error fetching enrollments:", error);
+    }
+  };
+
   const fetchCourses = async () => {
     try {
       if (showAll) {
         const allCourses = await client.fetchAllCourses();
         dispatch(setCourses(allCourses));
-        // Also fetch enrolled courses to know which ones user is enrolled in
-        const enrolledCourses = await client.findMyCourses();
-        setEnrolledCourseIds(enrolledCourses.map((c: any) => c._id));
+        // Also fetch enrollments to know which ones user is enrolled in
+        await fetchEnrollments();
       } else {
         const enrolledCourses = await client.findMyCourses();
         dispatch(setCourses(enrolledCourses));
         setEnrolledCourseIds(enrolledCourses.map((c: any) => c._id));
+        // Also fetch enrollments for Redux store
+        await fetchEnrollments();
       }
     } catch (error) {
       console.error(error);
@@ -261,16 +274,17 @@ export default function Dashboard() {
                           ) : (
                             <button
                               className="btn btn-success"
-                              onClick={(e) => {
+                              onClick={async (e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                dispatch({
-                                  type: "enrollments/enroll",
-                                  payload: {
-                                    user: currentUser._id,
-                                    course: course._id,
-                                  },
-                                });
+                                try {
+                                  await enrollmentsClient.enrollUserInCourse(
+                                    course._id
+                                  );
+                                  await fetchEnrollments();
+                                } catch (error) {
+                                  console.error("Error enrolling:", error);
+                                }
                               }}
                             >
                               Enroll
@@ -281,16 +295,17 @@ export default function Dashboard() {
                         return isEnrolled ? (
                           <button
                             className="btn btn-danger"
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              dispatch({
-                                type: "enrollments/unenroll",
-                                payload: {
-                                  user: currentUser?._id,
-                                  course: course._id,
-                                },
-                              });
+                              try {
+                                await enrollmentsClient.unenrollUserFromCourse(
+                                  course._id
+                                );
+                                await fetchEnrollments();
+                              } catch (error) {
+                                console.error("Error unenrolling:", error);
+                              }
                             }}
                           >
                             Unenroll
@@ -298,16 +313,17 @@ export default function Dashboard() {
                         ) : (
                           <button
                             className="btn btn-success"
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              dispatch({
-                                type: "enrollments/enroll",
-                                payload: {
-                                  user: currentUser?._id,
-                                  course: course._id,
-                                },
-                              });
+                              try {
+                                await enrollmentsClient.enrollUserInCourse(
+                                  course._id
+                                );
+                                await fetchEnrollments();
+                              } catch (error) {
+                                console.error("Error enrolling:", error);
+                              }
                             }}
                           >
                             Enroll
