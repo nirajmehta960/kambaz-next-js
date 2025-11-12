@@ -87,12 +87,12 @@ export default function WorkingWithArraysAsynchronously() {
         />
         <button
           onClick={() =>
-            deleteTodo({ id: 231, title: "Test", completed: false })
+            deleteTodo({ id: 1234, title: "Test", completed: false })
           }
           className="btn btn-danger btn-sm float-end me-2"
           id="wd-test-delete-error"
         >
-          Test Delete Error (ID: 231)
+          Test Delete Error (ID: 1234)
         </button>
       </h4>
       <ListGroup>
