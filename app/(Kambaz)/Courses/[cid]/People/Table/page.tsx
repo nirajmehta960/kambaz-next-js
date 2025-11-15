@@ -4,11 +4,14 @@ import { FaUserCircle } from "react-icons/fa";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import * as enrollmentsClient from "../../../../Enrollments/client";
+import PeopleDetails from "../Details";
 
 export default function PeopleTable() {
   const { cid } = useParams();
   const courseId = Array.isArray(cid) ? cid[0] : cid;
   const [users, setUsers] = useState<any[]>([]);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showUserId, setShowUserId] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     if (!courseId) return;
@@ -43,8 +46,16 @@ export default function PeopleTable() {
             <tr key={user._id}>
               <td className="wd-full-name text-nowrap">
                 <FaUserCircle className="me-2 fs-1 text-secondary" />
-                <span className="wd-first-name">{user.firstName}</span>{" "}
-                <span className="wd-last-name">{user.lastName}</span>
+                <span
+                  onClick={() => {
+                    setShowDetails(true);
+                    setShowUserId(user._id);
+                  }}
+                  style={{ cursor: "pointer" }}
+                >
+                  <span className="wd-first-name">{user.firstName}</span>{" "}
+                  <span className="wd-last-name">{user.lastName}</span>
+                </span>
               </td>
               <td className="wd-login-id">{user.loginId}</td>
               <td className="wd-section">{user.section}</td>
@@ -55,6 +66,15 @@ export default function PeopleTable() {
           ))}
         </tbody>
       </Table>
+      {showDetails && (
+        <PeopleDetails
+          uid={showUserId}
+          onClose={() => {
+            setShowDetails(false);
+            fetchUsers();
+          }}
+        />
+      )}
     </div>
   );
 }
