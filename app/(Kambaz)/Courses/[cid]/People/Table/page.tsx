@@ -3,7 +3,7 @@ import { Table } from "react-bootstrap";
 import { FaUserCircle } from "react-icons/fa";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import * as enrollmentsClient from "../../../../Enrollments/client";
+import * as client from "../../../client";
 import PeopleDetails from "../Details";
 
 export default function PeopleTable() {
@@ -16,7 +16,7 @@ export default function PeopleTable() {
   const fetchUsers = async () => {
     if (!courseId) return;
     try {
-      const courseUsers = await enrollmentsClient.findUsersForCourse(courseId);
+      const courseUsers = await client.findUsersForCourse(courseId);
       setUsers(courseUsers);
     } catch (error) {
       console.error("Error fetching users:", error);

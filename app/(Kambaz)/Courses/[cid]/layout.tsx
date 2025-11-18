@@ -41,9 +41,14 @@ export default function CoursesLayout({
       router.push("/Dashboard");
       return;
     }
-    const allowed = enrollments.some(
-      (e: any) => e.user === currentUser._id && e.course === cid
-    );
+    // If user is FACULTY or ADMIN, allow access
+    if (currentUser.role === "FACULTY" || currentUser.role === "ADMIN") {
+      return;
+    }
+    // Check if the course is in the enrolled courses list
+    // enrollments from findEnrollmentsForUser returns courses, not enrollment objects
+    const enrolledCourseIds = enrollments.map((e: any) => e._id || e.course);
+    const allowed = enrolledCourseIds.includes(cid);
     if (!allowed) {
       router.push("/Dashboard");
     }

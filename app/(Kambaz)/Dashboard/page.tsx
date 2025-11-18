@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import * as userClient from "../Account/client";
 import * as client from "../Courses/client";
 import * as enrollmentsClient from "../Enrollments/client";
 import { setCourses } from "../Courses/reducer";
@@ -23,44 +24,83 @@ export default function Dashboard() {
   const { courses } = useSelector((state: any) => state.coursesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const dispatch = useDispatch();
-  const [showAll, setShowAll] = useState(false);
-  const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
+  const [enrolling, setEnrolling] = useState(false);
 
-  const fetchEnrollments = async () => {
+  const findCoursesForUser = async () => {
     try {
-      const enrollments = await enrollmentsClient.findEnrollmentsForUser();
-      dispatch(setEnrollments(enrollments));
-      setEnrolledCourseIds(enrollments.map((e: any) => e.course));
+      if (!currentUser) return;
+      const courses = await userClient.findCoursesForUser(currentUser._id);
+      // All courses from findCoursesForUser are enrolled, so set enrolled flag
+      const coursesWithEnrolledFlag = courses.map((course: any) => ({
+        ...course,
+        enrolled: true,
+      }));
+      dispatch(setCourses(coursesWithEnrolledFlag));
     } catch (error) {
-      console.error("Error fetching enrollments:", error);
+      console.error("Error fetching courses for user:", error);
     }
   };
 
   const fetchCourses = async () => {
     try {
-      if (showAll) {
+      if (!currentUser) return;
+      if (enrolling) {
         const allCourses = await client.fetchAllCourses();
-        dispatch(setCourses(allCourses));
-        // Also fetch enrollments to know which ones user is enrolled in
-        await fetchEnrollments();
+        const enrolledCourses = await userClient.findCoursesForUser(
+          currentUser._id
+        );
+        const enrolledCourseIds = enrolledCourses.map((c: any) => c._id);
+        const coursesWithEnrolledFlag = allCourses.map((course: any) => ({
+          ...course,
+          enrolled: enrolledCourseIds.includes(course._id),
+        }));
+        dispatch(setCourses(coursesWithEnrolledFlag));
       } else {
-        const enrolledCourses = await client.findMyCourses();
-        dispatch(setCourses(enrolledCourses));
-        setEnrolledCourseIds(enrolledCourses.map((c: any) => c._id));
-        // Also fetch enrollments for Redux store
-        await fetchEnrollments();
+        await findCoursesForUser();
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching courses:", error);
+    }
+  };
+
+  const updateEnrollment = async (courseId: string, enrolled: boolean) => {
+    try {
+      if (!currentUser) return;
+      if (enrolled) {
+        await userClient.enrollIntoCourse(currentUser._id, courseId);
+      } else {
+        await userClient.unenrollFromCourse(currentUser._id, courseId);
+      }
+      // Update local state
+      const newCourses = courses.map((course: any) =>
+        course._id === courseId ? { ...course, enrolled } : course
+      );
+      dispatch(setCourses(newCourses));
+
+      // Refresh enrollments in Redux store for CoursesLayout to work correctly
+      try {
+        const updatedEnrollments =
+          await enrollmentsClient.findEnrollmentsForUser();
+        dispatch(setEnrollments(updatedEnrollments));
+      } catch (error) {
+        console.error("Error refreshing enrollments:", error);
+      }
+
+      // If not in enrolling mode, refresh the courses list to reflect changes
+      if (!enrolling) {
+        await findCoursesForUser();
+      }
+    } catch (error) {
+      console.error("Error updating enrollment:", error);
     }
   };
 
   const onAddNewCourse = async (course: any) => {
     try {
       const newCourse = await client.createCourse(course);
-      dispatch(setCourses([...courses, newCourse]));
-      // New course is automatically enrolled, so add to enrolled list
-      setEnrolledCourseIds([...enrolledCourseIds, newCourse._id]);
+      // New course is automatically enrolled
+      const courseWithEnrolled = { ...newCourse, enrolled: true };
+      dispatch(setCourses([...courses, courseWithEnrolled]));
     } catch (error) {
       console.error("Error creating course:", error);
       // Optionally show user-friendly error message
@@ -73,8 +113,6 @@ export default function Dashboard() {
       dispatch(
         setCourses(courses.filter((course: any) => course._id !== courseId))
       );
-      // Remove from enrolled list if it was there
-      setEnrolledCourseIds(enrolledCourseIds.filter((id) => id !== courseId));
     } catch (error) {
       console.error("Error deleting course:", error);
       // Optionally show user-friendly error message
@@ -103,9 +141,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (currentUser) {
-      fetchCourses();
+      if (enrolling) {
+        fetchCourses();
+      } else {
+        findCoursesForUser();
+      }
     }
-  }, [currentUser, showAll]);
+  }, [currentUser, enrolling]);
 
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
@@ -136,9 +178,9 @@ export default function Dashboard() {
           <div className="d-flex align-items-center gap-2">
             <button
               className="btn btn-primary"
-              onClick={() => setShowAll(!showAll)}
+              onClick={() => setEnrolling(!enrolling)}
             >
-              {showAll ? "Show Enrolled Only" : "Show All Courses"}
+              {enrolling ? "My Courses" : "All Courses"}
             </button>
             {currentUser?.role === "FACULTY" && (
               <button
@@ -160,7 +202,7 @@ export default function Dashboard() {
       <h2 id="wd-dashboard-published">
         {!currentUser
           ? `Enrolled Courses (0)`
-          : showAll
+          : enrolling
           ? `Published Courses (${courses.length})`
           : `Enrolled Courses (${courses.length})`}
       </h2>{" "}
@@ -177,9 +219,12 @@ export default function Dashboard() {
                 <Card className="h-100" style={{ height: 380 }}>
                   {(() => {
                     // Check if user can access this course (enrolled or faculty)
+                    // When enrolling is false, all courses are enrolled (from findCoursesForUser)
+                    // When enrolling is true, check the enrolled flag
                     const canAccess =
                       currentUser &&
-                      (enrolledCourseIds.includes(course._id) ||
+                      (!enrolling ||
+                        course.enrolled ||
                         currentUser.role === "FACULTY");
                     return canAccess ? (
                       <Link
@@ -205,9 +250,12 @@ export default function Dashboard() {
                   <CardBody className="card-body">
                     {(() => {
                       // Check if user can access this course (enrolled or faculty)
+                      // When enrolling is false, all courses are enrolled (from findCoursesForUser)
+                      // When enrolling is true, check the enrolled flag
                       const canAccess =
                         currentUser &&
-                        (enrolledCourseIds.includes(course._id) ||
+                        (!enrolling ||
+                          course.enrolled ||
                           currentUser.role === "FACULTY");
                       return canAccess ? (
                         <Link
@@ -240,9 +288,11 @@ export default function Dashboard() {
                     })()}
                     <div className="d-flex gap-2 align-items-center mt-2">
                       {(() => {
+                        // When enrolling is false, all courses shown are enrolled
+                        // When enrolling is true, check the enrolled flag
                         const isEnrolled =
-                          currentUser && enrolledCourseIds.includes(course._id);
-                        if (isEnrolled) {
+                          !enrolling || course.enrolled || false;
+                        if (isEnrolled || currentUser?.role === "FACULTY") {
                           return (
                             <Link
                               href={`/Courses/${course._id}/Home`}
@@ -260,94 +310,59 @@ export default function Dashboard() {
                         );
                       })()}
                       {(() => {
-                        const isEnrolled =
-                          currentUser && enrolledCourseIds.includes(course._id);
+                        const isEnrolled = course.enrolled || false;
                         if (currentUser?.role === "FACULTY") {
-                          return isEnrolled ? (
+                          return (
                             <>
-                              <button
-                                id="wd-edit-course-click"
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  event.stopPropagation();
-                                  setModalMode("edit");
-                                  setEditableCourse({ ...course });
-                                  setShowModal(true);
-                                }}
-                                className="btn btn-warning me-2"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  event.stopPropagation();
-                                  onDeleteCourse(course._id);
-                                }}
-                                className="btn btn-danger"
-                                id="wd-delete-course-click"
-                              >
-                                Delete
-                              </button>
+                              {isEnrolled && (
+                                <>
+                                  <button
+                                    id="wd-edit-course-click"
+                                    onClick={(event) => {
+                                      event.preventDefault();
+                                      event.stopPropagation();
+                                      setModalMode("edit");
+                                      setEditableCourse({ ...course });
+                                      setShowModal(true);
+                                    }}
+                                    className="btn btn-warning me-2"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={(event) => {
+                                      event.preventDefault();
+                                      event.stopPropagation();
+                                      onDeleteCourse(course._id);
+                                    }}
+                                    className="btn btn-danger"
+                                    id="wd-delete-course-click"
+                                  >
+                                    Delete
+                                  </button>
+                                </>
+                              )}
                             </>
-                          ) : (
+                          );
+                        }
+                        // Enroll/Unenroll buttons - only show when enrolling is true
+                        if (enrolling) {
+                          return (
                             <button
-                              className="btn btn-success"
-                              onClick={async (e) => {
+                              className={`btn ${
+                                isEnrolled ? "btn-danger" : "btn-success"
+                              } float-end`}
+                              onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                try {
-                                  await enrollmentsClient.enrollUserInCourse(
-                                    course._id
-                                  );
-                                  await fetchEnrollments();
-                                } catch (error) {
-                                  console.error("Error enrolling:", error);
-                                }
+                                updateEnrollment(course._id, !isEnrolled);
                               }}
                             >
-                              Enroll
+                              {isEnrolled ? "Unenroll" : "Enroll"}
                             </button>
                           );
                         }
-                        // Student/other users
-                        return isEnrolled ? (
-                          <button
-                            className="btn btn-danger"
-                            onClick={async (e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              try {
-                                await enrollmentsClient.unenrollUserFromCourse(
-                                  course._id
-                                );
-                                await fetchEnrollments();
-                              } catch (error) {
-                                console.error("Error unenrolling:", error);
-                              }
-                            }}
-                          >
-                            Unenroll
-                          </button>
-                        ) : (
-                          <button
-                            className="btn btn-success"
-                            onClick={async (e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              try {
-                                await enrollmentsClient.enrollUserInCourse(
-                                  course._id
-                                );
-                                await fetchEnrollments();
-                              } catch (error) {
-                                console.error("Error enrolling:", error);
-                              }
-                            }}
-                          >
-                            Enroll
-                          </button>
-                        );
+                        return null;
                       })()}
                     </div>
                   </CardBody>

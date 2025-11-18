@@ -57,3 +57,10 @@ export const updateCourse = async (course: any) => {
   const { data } = await axios.put(`${COURSES_API}/${course._id}`, course);
   return data;
 };
+
+export const findUsersForCourse = async (courseId: string) => {
+  const response = await axiosWithCredentials.get(
+    `${COURSES_API}/${courseId}/users`
+  );
+  return response.data;
+};
