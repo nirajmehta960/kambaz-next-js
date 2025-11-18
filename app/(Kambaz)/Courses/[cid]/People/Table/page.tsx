@@ -12,15 +12,26 @@ export default function PeopleTable() {
   const [users, setUsers] = useState<any[]>([]);
   const [showDetails, setShowDetails] = useState(false);
   const [showUserId, setShowUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchUsers = async () => {
-    if (!courseId) return;
+    if (!courseId) {
+      setLoading(false);
+      return;
+    }
     try {
+      setLoading(true);
       const courseUsers = await client.findUsersForCourse(courseId);
-      setUsers(courseUsers);
+      // Filter out null/undefined users and ensure all users have required properties
+      const validUsers = (courseUsers || []).filter(
+        (user: any) => user && user._id && typeof user === "object"
+      );
+      setUsers(validUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
       setUsers([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,28 +53,54 @@ export default function PeopleTable() {
           </tr>
         </thead>
         <tbody>
-          {users.map((user: any) => (
-            <tr key={user._id}>
-              <td className="wd-full-name text-nowrap">
-                <FaUserCircle className="me-2 fs-1 text-secondary" />
-                <span
-                  onClick={() => {
-                    setShowDetails(true);
-                    setShowUserId(user._id);
-                  }}
-                  style={{ cursor: "pointer" }}
-                >
-                  <span className="wd-first-name">{user.firstName}</span>{" "}
-                  <span className="wd-last-name">{user.lastName}</span>
-                </span>
+          {loading ? (
+            <tr>
+              <td colSpan={6} className="text-center">
+                Loading...
               </td>
-              <td className="wd-login-id">{user.loginId}</td>
-              <td className="wd-section">{user.section}</td>
-              <td className="wd-role">{user.role}</td>
-              <td className="wd-last-activity">{user.lastActivity}</td>
-              <td className="wd-total-activity">{user.totalActivity}</td>
             </tr>
-          ))}
+          ) : users.length === 0 ? (
+            <tr>
+              <td colSpan={6} className="text-center">
+                No users found
+              </td>
+            </tr>
+          ) : (
+            users
+              .filter((user: any) => user && user._id)
+              .map((user: any, index: number) => (
+                <tr key={user._id || `user-${index}`}>
+                  <td className="wd-full-name text-nowrap">
+                    <FaUserCircle className="me-2 fs-1 text-secondary" />
+                    <span
+                      onClick={() => {
+                        if (user && user._id) {
+                          setShowDetails(true);
+                          setShowUserId(user._id);
+                        }
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <span className="wd-first-name">
+                        {user?.firstName || ""}
+                      </span>{" "}
+                      <span className="wd-last-name">
+                        {user?.lastName || ""}
+                      </span>
+                    </span>
+                  </td>
+                  <td className="wd-login-id">{user?.loginId || ""}</td>
+                  <td className="wd-section">{user?.section || ""}</td>
+                  <td className="wd-role">{user?.role || ""}</td>
+                  <td className="wd-last-activity">
+                    {user?.lastActivity || ""}
+                  </td>
+                  <td className="wd-total-activity">
+                    {user?.totalActivity || ""}
+                  </td>
+                </tr>
+              ))
+          )}
         </tbody>
       </Table>
       {showDetails && (

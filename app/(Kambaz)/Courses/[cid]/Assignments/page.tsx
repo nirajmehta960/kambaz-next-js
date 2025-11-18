@@ -111,10 +111,9 @@ export default function Assignments() {
                 >
                   <span>
                     <span className="wd-assignment-link fw-semibold text-decoration-none fs-5">
-                      {assignment._id}
+                      {assignment.title || assignment._id}
                     </span>
                     <div className="wd-assignment-details text-body-secondary">
-                      <span className="text-danger">{assignment.title}</span> |{" "}
                       <strong>Not available until</strong>{" "}
                       {formatDate(assignment.availableFrom)} |{" "}
                       <strong>Due</strong> {formatDate(assignment.dueDate)} |{" "}

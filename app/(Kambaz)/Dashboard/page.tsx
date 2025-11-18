@@ -342,10 +342,23 @@ export default function Dashboard() {
                                   </button>
                                 </>
                               )}
+                              {/* Enroll button for faculty when viewing All Courses and NOT enrolled */}
+                              {enrolling && !isEnrolled && (
+                                <button
+                                  className="btn btn-success float-end"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    updateEnrollment(course._id, true);
+                                  }}
+                                >
+                                  Enroll
+                                </button>
+                              )}
                             </>
                           );
                         }
-                        // Enroll/Unenroll buttons - only show when enrolling is true
+                        // Enroll/Unenroll buttons for non-faculty - only show when enrolling is true
                         if (enrolling) {
                           return (
                             <button
