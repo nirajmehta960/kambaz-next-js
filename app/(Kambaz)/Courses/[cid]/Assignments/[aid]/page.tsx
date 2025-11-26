@@ -41,7 +41,6 @@ export default function AssignmentEditor() {
       dispatch(setAssignments([...assignments, assignment]));
     } catch (error) {
       console.error("Error creating assignment:", error);
-      // Optionally show user-friendly error message
     }
   };
 
@@ -54,7 +53,6 @@ export default function AssignmentEditor() {
       dispatch(setAssignments(newAssignments));
     } catch (error) {
       console.error("Error updating assignment:", error);
-      // Optionally show user-friendly error message
     }
   };
   return (

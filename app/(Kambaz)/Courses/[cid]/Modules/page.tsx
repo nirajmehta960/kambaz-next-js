@@ -28,7 +28,6 @@ export default function Modules() {
       setModuleName("");
     } catch (error) {
       console.error("Error creating module:", error);
-      // Optionally show user-friendly error message
     }
   };
 
@@ -43,9 +42,12 @@ export default function Modules() {
 
   const onUpdateModule = async (module: any) => {
     try {
-      await client.updateModule(module);
+      // Remove UI-only fields before sending to backend
+      const { editing, ...moduleToUpdate } = module;
+      await client.updateModule(moduleToUpdate);
+      // Update local state - remove editing flag and update name
       const newModules = modules.map((m: any) =>
-        m._id === module._id ? module : m
+        m._id === module._id ? { ...m, name: module.name, editing: false } : m
       );
       dispatch(setModules(newModules));
     } catch (error) {

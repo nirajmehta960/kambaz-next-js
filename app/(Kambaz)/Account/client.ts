@@ -4,12 +4,35 @@ const axiosWithCredentials = axios.create({
   withCredentials: true,
 });
 
-export const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER || "http://localhost:4000";
+export const HTTP_SERVER =
+  process.env.NEXT_PUBLIC_HTTP_SERVER || "http://localhost:4000";
 export const USERS_API = `${HTTP_SERVER}/api/users`;
 
 export const signin = async (credentials: any) => {
-  const response = await axiosWithCredentials.post(`${USERS_API}/signin`, credentials);
-  return response.data;
+  try {
+    const response = await axiosWithCredentials.post(
+      `${USERS_API}/signin`,
+      credentials
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      const status = error.response.status;
+      const message =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        "Invalid username or password";
+      throw new Error(message);
+    } else if (error.request) {
+      throw new Error(
+        "Unable to connect to the server. Please check if the backend server is running."
+      );
+    } else {
+      throw new Error(
+        error.message || "An unexpected error occurred during sign in."
+      );
+    }
+  }
 };
 
 export const profile = async () => {
@@ -61,8 +84,20 @@ export const deleteUser = async (userId: string) => {
 };
 
 export const createUser = async (user: any) => {
-  const response = await axiosWithCredentials.post(`${USERS_API}`, user);
-  return response.data;
+  try {
+    const response = await axiosWithCredentials.post(`${USERS_API}`, user);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error creating user:", error);
+    if (error.response) {
+      throw new Error(
+        error.response.data?.error ||
+          error.response.data?.message ||
+          "Failed to create user"
+      );
+    }
+    throw error;
+  }
 };
 
 export const findCoursesForUser = async (userId: string) => {
