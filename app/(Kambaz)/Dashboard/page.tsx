@@ -30,36 +30,45 @@ export default function Dashboard() {
     try {
       if (!currentUser) return;
       const courses = await userClient.findCoursesForUser(currentUser._id);
-      // All courses from findCoursesForUser are enrolled, so set enrolled flag
-      const coursesWithEnrolledFlag = courses.map((course: any) => ({
+      // Filter out null/undefined courses and set enrolled flag
+      const validCourses = Array.isArray(courses)
+        ? courses.filter((c: any) => c && c._id)
+        : [];
+      const coursesWithEnrolledFlag = validCourses.map((course: any) => ({
         ...course,
         enrolled: true,
       }));
       dispatch(setCourses(coursesWithEnrolledFlag));
     } catch (error) {
       console.error("Error fetching courses for user:", error);
+      dispatch(setCourses([]));
     }
   };
 
   const fetchCourses = async () => {
     try {
       if (!currentUser) return;
-      if (enrolling) {
-        const allCourses = await client.fetchAllCourses();
-        const enrolledCourses = await userClient.findCoursesForUser(
-          currentUser._id
-        );
-        const enrolledCourseIds = enrolledCourses.map((c: any) => c._id);
-        const coursesWithEnrolledFlag = allCourses.map((course: any) => ({
+      const allCourses = await client.fetchAllCourses();
+      const enrolledCourses = await userClient.findCoursesForUser(
+        currentUser._id
+      );
+      const enrolledCourseIds = (
+        Array.isArray(enrolledCourses) ? enrolledCourses : []
+      )
+        .filter((c: any) => c && c._id)
+        .map((c: any) => c._id);
+      const coursesWithEnrolledFlag = (
+        Array.isArray(allCourses) ? allCourses : []
+      )
+        .filter((course: any) => course && course._id)
+        .map((course: any) => ({
           ...course,
           enrolled: enrolledCourseIds.includes(course._id),
         }));
-        dispatch(setCourses(coursesWithEnrolledFlag));
-      } else {
-        await findCoursesForUser();
-      }
+      dispatch(setCourses(coursesWithEnrolledFlag));
     } catch (error) {
       console.error("Error fetching courses:", error);
+      dispatch(setCourses([]));
     }
   };
 
@@ -71,11 +80,6 @@ export default function Dashboard() {
       } else {
         await userClient.unenrollFromCourse(currentUser._id, courseId);
       }
-      // Update local state
-      const newCourses = courses.map((course: any) =>
-        course._id === courseId ? { ...course, enrolled } : course
-      );
-      dispatch(setCourses(newCourses));
 
       // Refresh enrollments in Redux store for CoursesLayout to work correctly
       try {
@@ -86,8 +90,12 @@ export default function Dashboard() {
         console.error("Error refreshing enrollments:", error);
       }
 
-      // If not in enrolling mode, refresh the courses list to reflect changes
-      if (!enrolling) {
+      // Refresh courses list to reflect enrollment changes
+      if (enrolling) {
+        // In "All Courses" mode, refresh to get updated enrollment status
+        await fetchCourses();
+      } else {
+        // In "My Courses" mode, refresh to show only enrolled courses
         await findCoursesForUser();
       }
     } catch (error) {
@@ -98,12 +106,18 @@ export default function Dashboard() {
   const onAddNewCourse = async (course: any) => {
     try {
       const newCourse = await client.createCourse(course);
-      // New course is automatically enrolled
+      // New course is automatically enrolled by backend
       const courseWithEnrolled = { ...newCourse, enrolled: true };
-      dispatch(setCourses([...courses, courseWithEnrolled]));
+
+      // If in "My Courses" mode, refresh to show the new course
+      if (!enrolling) {
+        await findCoursesForUser();
+      } else {
+        // If in "All Courses" mode, add to current list
+        dispatch(setCourses([...courses, courseWithEnrolled]));
+      }
     } catch (error) {
       console.error("Error creating course:", error);
-      // Optionally show user-friendly error message
     }
   };
 
@@ -115,7 +129,6 @@ export default function Dashboard() {
       );
     } catch (error) {
       console.error("Error deleting course:", error);
-      // Optionally show user-friendly error message
     }
   };
 
@@ -135,7 +148,6 @@ export default function Dashboard() {
       );
     } catch (error) {
       console.error("Error updating course:", error);
-      // Optionally show user-friendly error message
     }
   };
 

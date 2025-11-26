@@ -19,7 +19,6 @@ export default function Signup() {
       router.push("/Account/Profile");
     } catch (error) {
       console.error("Error signing up:", error);
-      // Optionally show user-friendly error message
     }
   };
 

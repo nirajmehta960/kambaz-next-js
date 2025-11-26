@@ -12,19 +12,33 @@ export default function Signin() {
     username: "niraj.mehta",
     password: "Niraj@762483",
   });
+  const [error, setError] = useState<string>("");
   const dispatch = useDispatch();
   const router = useRouter();
 
   const signin = async () => {
-    const user = await client.signin(credentials);
-    if (!user) return;
-    dispatch(setCurrentUser(user));
-    router.push("/Dashboard");
+    try {
+      setError("");
+      const user = await client.signin(credentials);
+      if (!user) {
+        setError("Invalid username or password");
+        return;
+      }
+      dispatch(setCurrentUser(user));
+      router.push("/Dashboard");
+    } catch (error: any) {
+      setError(error.message || "Failed to sign in. Please try again.");
+    }
   };
 
   return (
     <div id="wd-signin-screen">
       <h1>Sign in</h1>
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
       <FormControl
         value={credentials.username}
         onChange={(e) =>
