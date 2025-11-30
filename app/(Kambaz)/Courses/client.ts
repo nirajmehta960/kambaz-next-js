@@ -28,6 +28,14 @@ export const updateModule = async (module: any) => {
   return data;
 };
 
+export const addLessonToModule = async (moduleId: string, lesson: any) => {
+  const { data } = await axiosWithCredentials.post(
+    `${MODULES_API}/${moduleId}/lessons`,
+    lesson
+  );
+  return data;
+};
+
 export const createCourse = async (course: any) => {
   const { data } = await axiosWithCredentials.post(
     `${USERS_API}/current/courses`,

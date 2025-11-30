@@ -9,10 +9,12 @@ export default function ModuleControlButtons({
   moduleId,
   deleteModule,
   editModule,
+  addLesson,
 }: {
   moduleId: string;
   deleteModule: (moduleId: string) => void;
   editModule: (moduleId: string) => void;
+  addLesson?: (moduleId: string) => void;
 }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   
@@ -31,7 +33,16 @@ export default function ModuleControlButtons({
         </>
       )}
       <GreenCheckmark />
-      <BsPlus className="fs-1" />
+      {currentUser?.role === "FACULTY" && addLesson && (
+        <BsPlus
+          className="fs-1 me-2"
+          style={{ cursor: "pointer" }}
+          onClick={() => addLesson(moduleId)}
+        />
+      )}
+      {(!currentUser?.role || currentUser?.role !== "FACULTY") && (
+        <BsPlus className="fs-1 me-2" />
+      )}
       <IoEllipsisVertical className="fs-4" />
     </div>
   );
