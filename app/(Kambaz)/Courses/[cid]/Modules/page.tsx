@@ -9,6 +9,7 @@ import { FormControl } from "react-bootstrap";
 import ModulesControls from "./ModulesControls";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
+import LessonEditor from "./LessonEditor";
 import { BsGripVertical } from "react-icons/bs";
 import { useState, useEffect } from "react";
 
@@ -18,6 +19,9 @@ export default function Modules() {
   const { modules } = useSelector((state: any) => state.modulesReducer);
   const dispatch = useDispatch();
   const [moduleName, setModuleName] = useState("");
+  const [lessonName, setLessonName] = useState("");
+  const [showLessonEditor, setShowLessonEditor] = useState(false);
+  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
 
   const onCreateModuleForCourse = async () => {
     if (!courseId) return;
@@ -66,6 +70,26 @@ export default function Modules() {
       dispatch(setModules([]));
     }
   };
+
+  const onAddLesson = (moduleId: string) => {
+    setSelectedModuleId(moduleId);
+    setShowLessonEditor(true);
+  };
+
+  const onCreateLesson = async () => {
+    if (!selectedModuleId || !lessonName.trim()) return;
+    try {
+      const newLesson = { name: lessonName };
+      await client.addLessonToModule(selectedModuleId, newLesson);
+      // Refresh modules to get updated data
+      await fetchModules();
+      setLessonName("");
+      setSelectedModuleId(null);
+    } catch (error) {
+      console.error("Error creating lesson:", error);
+    }
+  };
+
   useEffect(() => {
     fetchModules();
   }, [courseId]);
@@ -112,6 +136,7 @@ export default function Modules() {
                 moduleId={module._id}
                 deleteModule={onRemoveModule}
                 editModule={(moduleId) => dispatch(editModule(moduleId))}
+                addLesson={onAddLesson}
               />
             </div>
             {module.lessons && (
@@ -130,6 +155,18 @@ export default function Modules() {
           </ListGroupItem>
         ))}
       </ListGroup>
+      <LessonEditor
+        show={showLessonEditor}
+        handleClose={() => {
+          setShowLessonEditor(false);
+          setLessonName("");
+          setSelectedModuleId(null);
+        }}
+        dialogTitle="Add Lesson"
+        lessonName={lessonName}
+        setLessonName={setLessonName}
+        addLesson={onCreateLesson}
+      />
     </div>
   );
 }

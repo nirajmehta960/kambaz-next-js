@@ -62,32 +62,37 @@ export default function Users() {
   return (
     <div>
       <h3>Users</h3>
-      {currentUser?.role === "ADMIN" && (
-        <button
-          onClick={createUser}
-          className="float-end btn btn-danger wd-add-people"
-        >
-          <FaPlus className="me-2" />
-          Users
-        </button>
-      )}
-      <FormControl
-        onChange={(e) => filterUsersByName(e.target.value)}
-        placeholder="Search people"
-        className="float-start w-25 me-2 wd-filter-by-name"
-      />
+      <div className="d-flex align-items-center mb-3">
+        <FormControl
+          onChange={(e) => filterUsersByName(e.target.value)}
+          placeholder="Search people"
+          className="me-3 wd-filter-by-name"
+          style={{ width: "300px" }}
+        />
 
-      <select
-        value={role}
-        onChange={(e) => filterUsersByRole(e.target.value)}
-        className="form-select float-start w-25 wd-select-role"
-      >
-        <option value="">All Roles</option>{" "}
-        <option value="STUDENT">Students</option>
-        <option value="TA">Assistants</option>{" "}
-        <option value="FACULTY">Faculty</option>
-        <option value="ADMIN">Administrators</option>
-      </select>
+        <select
+          value={role}
+          onChange={(e) => filterUsersByRole(e.target.value)}
+          className="form-select wd-select-role"
+          style={{ width: "200px" }}
+        >
+          <option value="">All Roles</option>{" "}
+          <option value="STUDENT">Students</option>
+          <option value="TA">Assistants</option>{" "}
+          <option value="FACULTY">Faculty</option>
+          <option value="ADMIN">Administrators</option>
+        </select>
+
+        {currentUser?.role === "ADMIN" && (
+          <button
+            onClick={createUser}
+            className="btn btn-danger ms-5 d-inline-flex align-items-center wd-add-people"
+          >
+            <FaPlus className="me-2" />
+            Users
+          </button>
+        )}
+      </div>
       <PeopleTable
         users={users}
         fetchUsers={fetchUsers}
